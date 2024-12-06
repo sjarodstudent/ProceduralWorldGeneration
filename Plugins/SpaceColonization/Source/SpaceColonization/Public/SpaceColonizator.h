@@ -4,23 +4,31 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "Node.generated.h"
+#include "SpaceColonizator.generated.h"
 
 class AAttractor;
+class ANode;
 
 UCLASS()
-class SPACECOLONIZATION_API ANode : public AActor
+class SPACECOLONIZATION_API ASpaceColonizator : public AActor
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this actor's properties
-	ANode();
+private:
+	UPROPERTY(EditAnywhere, Category="Space Colonization")
+	TArray<AAttractor*> Leaves;
+	UPROPERTY(EditAnywhere, Category="Space Colonization")
+	TArray<ANode*> Branches;
 
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	float SegmentLength;
 
-	TArray<AAttractor*> CurrentNearbyAttractors;
+	
+	ANode* RootBranch = nullptr;
+	
+public:	
+	// Sets default values for this actor's properties
+	ASpaceColonizator();
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,5 +38,4 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	ANode* GenerateChildNode();
 };
