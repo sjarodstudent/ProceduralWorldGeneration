@@ -4,27 +4,88 @@
 #include "SpaceColonizator.h"
 
 #include "Attractor.h"
-#include "IntVectorTypes.h"
 #include "Node.h"
-#include "VectorTypes.h"
-#include "Particles/Attractor/ParticleModuleAttractorParticle.h"
 
 // Sets default values
 ASpaceColonizator::ASpaceColonizator()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
+	
+	// transform may not be needed
+	// RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 
 }
 
-#define DebugLog(seconds, color, ...) GEngine->AddOnScreenDebugMessage(-1, seconds, color, FString::Printf(__VA_ARGS__))
+bool ASpaceColonizator::IsAnyBranchInAttractionDistance()
+{
+	for (const auto& leaf : Leaves)
+	{
+		float d = leaf->GetDistanceTo(RootBranch);
+		if (d <= leaf->AttractionDistance)
+			return true;
+	}
+	return false;
+}
 
-#define DebugLogRed(...) DebugLog(15.f, FColor::Red, __VA_ARGS__)
-#define DebugLogGreen(...) DebugLog(15.f, FColor::Green, __VA_ARGS__)
-#define DebugLogBlue(...) DebugLog(15.f, FColor::Cyan, __VA_ARGS__)
 
-#define DebugLogPerFrame(color, ...) DebugLog(DeltaTime, color, __VA_ARGS__)
+void ASpaceColonizator::GrowBranches()
+{
+	// generate next nodes
+	
+	int constSize = Branches.Num();
+	for (int i = 0; i < constSize; ++i)
+	{
+		ANode* child = Branches[i]->GenerateChildNode();
+		Branches.Add(child);
+	}
+}
+
+void ASpaceColonizator::GenerateTrunk()
+{
+	ANode* LastBranch = RootBranch;
+
+	while (!IsAnyBranchInAttractionDistance())
+	{
+		ANode* newBranch = LastBranch->GenerateChildNode();
+		Branches.Add(newBranch);
+		LastBranch = newBranch;
+	}
+	
+}
+
+void ASpaceColonizator::ProcessLeaves()
+{
+	// link attractors to their closest node
+
+	for (int i = 0; i < Leaves.Num(); ++i)
+	{
+		float minDistance = TNumericLimits<float>::Max();
+		for (int j = 0; j < Branches.Num(); ++j)
+		{
+			float d = FVector::Dist(Branches[j]->GetActorLocation(), Leaves[i]->GetActorLocation());
+			if (d < minDistance)
+			{
+				minDistance = d;
+
+				// Closest branch
+				Leaves[i]->CurrentAttractedNode = Branches[j];
+			}
+		}
+
+		if (Leaves[i]->IsReached())
+		{
+			AAttractor* toRemove = Leaves[i];
+			Leaves.Remove(toRemove);
+			Destroy(toRemove);
+		}
+		
+		if (Leaves[i]->IsInAttractionRange())
+			Leaves[i]->CurrentAttractedNode->CurrentNearbyAttractors.Add(Leaves[i]);
+		else
+			Leaves[i]->CurrentAttractedNode = nullptr;
+	}
+}
 
 // Called when the game starts or when spawned
 void ASpaceColonizator::BeginPlay()
@@ -37,42 +98,8 @@ void ASpaceColonizator::BeginPlay()
 		RootBranch->SegmentLength = SegmentLength;
 	}
 
-	// link attractors to their closest node
-
-	for (int i = 0; i < Leaves.Num(); ++i)
-	{
-		float minDistance = TNumericLimits<float>::Max();
-		for (int j = 0; j < Branches.Num(); ++j)
-		{
-			float d = FVector::Dist(Branches[j]->GetActorLocation(), Leaves[i]->GetActorLocation());
-			if (d < minDistance)
-			{
-				minDistance = d;
-				Leaves[i]->CurrentAttractedNode = Branches[j];
-			}
-		}
-		Leaves[i]->CurrentAttractedNode->CurrentNearbyAttractors.Add(Leaves[i]);
-		DebugLogRed(TEXT("%f, %f, %f"), Leaves[i]->GetActorLocation().X,
-			Leaves[i]->GetActorLocation().Y,
-			Leaves[i]->GetActorLocation().Z);
-	}
-
+	
 	// generate next node
 
-	int constSize = Branches.Num();
-	for (int i = 0; i < constSize; ++i)
-	{
-		ANode* child = Branches[i]->GenerateChildNode();
-		DebugLogBlue(TEXT("%f, %f, %f"), child->GetActorLocation().X,
-	child->GetActorLocation().Y,
-	child->GetActorLocation().Z);
-
-		Branches.Add(child);
-	}
-}
-
-// Called every frame
-void ASpaceColonizator::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	GrowBranches();
 }

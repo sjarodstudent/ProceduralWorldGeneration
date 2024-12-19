@@ -7,6 +7,7 @@
 #include "Attractor.generated.h"
 
 class ANode;
+class UStaticMeshComponent;
 
 UCLASS()
 class SPACECOLONIZATION_API AAttractor : public AActor
@@ -16,6 +17,9 @@ class SPACECOLONIZATION_API AAttractor : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AAttractor();
+	float GetDistanceToCurrentAttractedNode();
+	bool IsInAttractionRange();
+	bool IsReached();
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float AttractionDistance;
@@ -23,14 +27,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float KillDistance;
 
+	UPROPERTY(EditAnywhere, Category = "Rendering")
+	UStaticMeshComponent* Mesh;
+
 	ANode* CurrentAttractedNode = nullptr;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	
 };

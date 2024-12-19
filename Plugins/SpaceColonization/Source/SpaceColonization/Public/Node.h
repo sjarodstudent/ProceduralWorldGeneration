@@ -7,11 +7,16 @@
 #include "Node.generated.h"
 
 class AAttractor;
+class UStaticMeshComponent;
+class UArrowComponent;
 
 UCLASS()
 class SPACECOLONIZATION_API ANode : public AActor
 {
 	GENERATED_BODY()
+
+private:
+	UArrowComponent* ArrowComponent;
 
 public:	
 	// Sets default values for this actor's properties
@@ -22,13 +27,9 @@ public:
 
 	TArray<AAttractor*> CurrentNearbyAttractors;
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, Category = "Rendering")
+	UStaticMeshComponent* Mesh;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	ANode* GenerateChildNode();
 };
