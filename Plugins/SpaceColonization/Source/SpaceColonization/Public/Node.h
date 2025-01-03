@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Rendering")
 	UStaticMeshComponent* Mesh;
 
+	void Reset();
+
+	inline bool HasAttractors() const { return CurrentNearbyAttractors.Num() > 0; }
 	ANode* GrowChildNode(const float segmentLengthOverride = 0.f);
 
 	inline float GetSegmentLength() const { return SegmentLength; }

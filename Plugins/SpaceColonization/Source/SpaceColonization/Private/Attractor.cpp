@@ -19,6 +19,12 @@ AAttractor::AAttractor()
 	Mesh->SetStaticMesh(SphereMesh.Object);
 }
 
+void AAttractor::Reset()
+{
+	Super::Reset();
+	CurrentAttractedNode = nullptr;
+}
+
 float AAttractor::GetDistanceToCurrentAttractedNode()
 {
 	if (!CurrentAttractedNode)
@@ -35,6 +41,10 @@ bool AAttractor::IsInAttractionRange()
 
 bool AAttractor::IsReached()
 {
+	// is not reached since it is not attracted
+	if (GetDistanceToCurrentAttractedNode() < 0.f)
+		return false;
+	
 	return GetDistanceToCurrentAttractedNode() <= KillDistance;
 }
 
@@ -42,5 +52,6 @@ void AAttractor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DrawDebugSphere(GetWorld(), GetActorLocation(), AttractionDistance, 30, FColor::Red, true, 999.f);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), AttractionDistance, 30, FColor::Yellow, true, 999.f);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), KillDistance, 30, FColor::Red, true, 999.f);
 }

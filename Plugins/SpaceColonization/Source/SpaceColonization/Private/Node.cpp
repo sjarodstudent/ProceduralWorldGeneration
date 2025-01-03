@@ -33,6 +33,12 @@ ANode::ANode()
 }
 
 
+void ANode::Reset()
+{
+	Super::Reset();
+	CurrentNearbyAttractors.Empty();
+}
+
 ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 {
 	// spawn a new node in direction of nearby attractors
@@ -42,6 +48,8 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 	{
 		dir += CurrentNearbyAttractors[i]->GetActorLocation();
 	}
+	
+	// if no nearby attractors, grow based on the parent direction
 	if (dir == FVector::ZeroVector)
 	{
 		dir = GetActorForwardVector();
@@ -55,13 +63,17 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 
 	}
 	dir.Normalize();
+	FRotator rot = dir.Rotation();
+	// rot = GetActorRotation();
 
 	dir *= SegmentLength;
 
 	// spawn the next node based on the computed direction
-	ANode* child = GetWorld()->SpawnActor<ANode>(GetActorLocation() + dir,
-		GetActorRotation());
+	ANode* child = GetWorld()->SpawnActor<ANode>(GetActorLocation() + dir, rot);
+	child->SetSegmentLength(SegmentLength);
 	
 	Children.Add(child);
+	Reset();
+	
 	return child;
 }

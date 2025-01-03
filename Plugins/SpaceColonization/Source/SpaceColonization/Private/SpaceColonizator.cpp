@@ -13,7 +13,7 @@ ASpaceColonizator::ASpaceColonizator()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
+
 	// transform may not be needed
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 
@@ -31,7 +31,9 @@ ASpaceColonizator::ASpaceColonizator()
 	}
 #endif // WITH_EDITORONLY_DATA
 
-
+	// ensure the array is empty
+	if (!Branches.IsEmpty())
+		Branches.Empty();
 }
 
 void ASpaceColonizator::GrowRootBranch()
@@ -44,11 +46,15 @@ void ASpaceColonizator::GrowRootBranch()
 	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	AActor* r = GetWorld()->SpawnActor(BranchType, &loc, &rot, spawnParams);
 	check(r);
-	
+
 	// save root branch
 	RootBranch = Cast<ANode>(r);
-	
+
 	RootBranch->SetSegmentLength(SegmentLength);
+
+	// ensure the array is empty (it should but it is not)
+	if (!Branches.IsEmpty())
+		Branches.Empty();
 
 	// add root branch to branch array
 	Branches.Add(RootBranch);
@@ -73,18 +79,6 @@ bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const ANode* branch)
 }
 
 
-void ASpaceColonizator::GrowBranches()
-{
-	// generate next nodes
-	
-	int constSize = Branches.Num();
-	for (int i = 0; i < constSize; ++i)
-	{
-		ANode* child = Branches[i]->GrowChildNode();
-		Branches.Add(child);
-	}
-}
-
 void ASpaceColonizator::GrowTrunk()
 {
 	ANode* LastBranch = RootBranch;
@@ -93,11 +87,10 @@ void ASpaceColonizator::GrowTrunk()
 	{
 		ANode* newBranch = LastBranch->GrowChildNode();
 		newBranch->SetSegmentLength(SegmentLength);
-		
+
 		Branches.Add(newBranch);
 		LastBranch = newBranch;
 	}
-	
 }
 
 void ASpaceColonizator::ProcessLeaves()
@@ -106,32 +99,56 @@ void ASpaceColonizator::ProcessLeaves()
 
 	for (int i = 0; i < Leaves.Num(); ++i)
 	{
+		AAttractor* leaf = Leaves[i];
+		leaf->Reset();
+
 		float minDistance = TNumericLimits<float>::Max();
+
 		for (int j = 0; j < Branches.Num(); ++j)
 		{
-			float d = FVector::Dist(Branches[j]->GetActorLocation(), Leaves[i]->GetActorLocation());
+			ANode* branch = Branches[j];
+
+			float d = FVector::Dist(branch->GetActorLocation(), leaf->GetActorLocation());
 			if (d < minDistance)
 			{
 				minDistance = d;
 
 				// Closest branch
-				Leaves[i]->CurrentAttractedNode = Branches[j];
+				leaf->CurrentAttractedNode = Branches[j];
 			}
 		}
 
-		if (Leaves[i]->IsReached())
+		if (leaf->IsReached())
 		{
-			AAttractor* toRemove = Leaves[i];
+			AAttractor* toRemove = leaf;
 			Leaves.Remove(toRemove);
 			toRemove->Destroy();
 		}
-		
-		if (Leaves[i]->IsInAttractionRange())
-			Leaves[i]->CurrentAttractedNode->CurrentNearbyAttractors.Add(Leaves[i]);
+
+		if (leaf->IsInAttractionRange())
+			leaf->CurrentAttractedNode->CurrentNearbyAttractors.Add(leaf);
 		else
-			Leaves[i]->CurrentAttractedNode = nullptr;
+			leaf->CurrentAttractedNode = nullptr;
 	}
 }
+
+void ASpaceColonizator::GrowBranches()
+{
+	// generate next nodes
+
+	int constSize = Branches.Num();
+	for (int i = 0; i < constSize; ++i)
+	{
+		ANode* branch = Branches[i];
+
+		if (branch->HasAttractors())
+		{
+			ANode* child = branch->GrowChildNode();
+			Branches.Add(child);
+		}
+	}
+}
+
 
 // Called when the game starts or when spawned
 void ASpaceColonizator::BeginPlay()
@@ -144,6 +161,27 @@ void ASpaceColonizator::BeginPlay()
 	// generate trunk
 	GrowTrunk();
 
-	
+
 	// generate next nodes
+
+	// while (Leaves.Num() > 0)
+	// {
+	// 	ProcessLeaves();
+	// 	GrowBranches();
+	// }
+}
+
+void ASpaceColonizator::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (GrowTimerStamp >= GrowTimer)
+	{
+		GrowTimerStamp = 0.f;
+
+		ProcessLeaves();
+		GrowBranches();
+	}
+
+	GrowTimerStamp += DeltaSeconds;
 }

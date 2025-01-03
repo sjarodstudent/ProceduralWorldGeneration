@@ -23,12 +23,16 @@ private:
 	TArray<AAttractor*> Leaves;
 
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
-	float SegmentLength = 10.f;
+	float SegmentLength = 100.f;
 
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	TSubclassOf<ANode> BranchType = nullptr;
 	
 	ANode* RootBranch = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	float GrowTimer = 0.1f;
+	float GrowTimerStamp = 0.f;
 	
 public:
 	
@@ -44,13 +48,15 @@ public:
 	// tells if a specified branch is in a leaf's attraction distance
 	bool IsBranchInAnyLeafAttractionDistance(const ANode* branch);
 	
-	void ProcessLeaves();
 	void GrowTrunk();
 	
+	void ProcessLeaves();
 	void GrowBranches();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 };

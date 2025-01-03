@@ -17,6 +17,8 @@ class SPACECOLONIZATION_API AAttractor : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AAttractor();
+
+	void Reset();
 	float GetDistanceToCurrentAttractedNode();
 	bool IsInAttractionRange();
 	bool IsReached();
