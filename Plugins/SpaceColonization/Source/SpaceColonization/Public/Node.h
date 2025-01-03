@@ -20,6 +20,8 @@ private:
 	UArrowComponent* ArrowComponent;
 
 	float SegmentLength = 0.f;
+
+	ANode* parent = nullptr;
 	
 public:
 	// Sets default values for this actor's properties
@@ -35,6 +37,10 @@ public:
 	inline bool HasAttractors() const { return CurrentNearbyAttractors.Num() > 0; }
 	ANode* GrowChildNode(const float segmentLengthOverride = 0.f);
 
+	void ThickenParent();
+
 	inline float GetSegmentLength() const { return SegmentLength; }
-	inline void SetSegmentLength(const float segmentLength) { SegmentLength = segmentLength; }
+	void SetSegmentLength(const float segmentLength);
 };
+
+
