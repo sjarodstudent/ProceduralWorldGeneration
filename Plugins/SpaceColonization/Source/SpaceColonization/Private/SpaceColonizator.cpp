@@ -114,7 +114,7 @@ void ASpaceColonizator::ProcessLeaves()
 				minDistance = d;
 
 				// Closest branch
-				leaf->CurrentAttractedNode = Branches[j];
+				leaf->CurrentAttractedNode = branch;
 			}
 		}
 
@@ -128,7 +128,7 @@ void ASpaceColonizator::ProcessLeaves()
 		if (leaf->IsInAttractionRange())
 			leaf->CurrentAttractedNode->CurrentNearbyAttractors.Add(leaf);
 		else
-			leaf->CurrentAttractedNode = nullptr;
+			leaf->Reset();
 	}
 }
 
@@ -143,6 +143,16 @@ void ASpaceColonizator::GrowBranches()
 
 		if (branch->HasAttractors())
 		{
+#if 0
+			for (int j = 0; j < branch->CurrentNearbyAttractors.Num(); ++j)
+			{
+				AAttractor* attractor = branch->CurrentNearbyAttractors[j];
+				FVector start = attractor->GetActorLocation();
+				FVector end = branch->GetActorLocation();
+				DrawDebugLine(GetWorld(), start, end, FColor::Blue, true, 0.1f, 0, 5.f);
+			}
+#endif
+
 			ANode* child = branch->GrowChildNode();
 			Branches.Add(child);
 		}

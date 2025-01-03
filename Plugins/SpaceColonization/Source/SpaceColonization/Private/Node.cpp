@@ -46,7 +46,8 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 	FVector dir = FVector::Zero();
 	for (int i = 0; i < CurrentNearbyAttractors.Num(); ++i)
 	{
-		dir += CurrentNearbyAttractors[i]->GetActorLocation();
+		// add direction to the attractor
+		dir += CurrentNearbyAttractors[i]->GetActorLocation() - GetActorLocation();
 	}
 	
 	// if no nearby attractors, grow based on the parent direction
@@ -64,7 +65,6 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 	}
 	dir.Normalize();
 	FRotator rot = dir.Rotation();
-	// rot = GetActorRotation();
 
 	dir *= SegmentLength;
 
