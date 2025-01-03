@@ -22,15 +22,15 @@ public:
 	bool IsReached();
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	float AttractionDistance;
+	float AttractionDistance = 500.f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	float KillDistance;
+	float KillDistance = 100.f;
 
 	UPROPERTY(EditAnywhere, Category = "Rendering")
 	UStaticMeshComponent* Mesh;
 
 	ANode* CurrentAttractedNode = nullptr;
 
-	
+	virtual void BeginPlay() override;
 };

@@ -37,3 +37,10 @@ bool AAttractor::IsReached()
 {
 	return GetDistanceToCurrentAttractedNode() <= KillDistance;
 }
+
+void AAttractor::BeginPlay()
+{
+	Super::BeginPlay();
+
+	DrawDebugSphere(GetWorld(), GetActorLocation(), AttractionDistance, 30, FColor::Red, true, 999.f);
+}

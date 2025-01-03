@@ -16,20 +16,22 @@ class SPACECOLONIZATION_API ANode : public AActor
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Arrow")
 	UArrowComponent* ArrowComponent;
 
-public:	
+	float SegmentLength = 0.f;
+	
+public:
 	// Sets default values for this actor's properties
 	ANode();
-
-	UPROPERTY(EditAnywhere, Category="Space Colonization")
-	float SegmentLength;
 
 	TArray<AAttractor*> CurrentNearbyAttractors;
 
 	UPROPERTY(EditAnywhere, Category = "Rendering")
 	UStaticMeshComponent* Mesh;
 
+	ANode* GrowChildNode(const float segmentLengthOverride = 0.f);
 
-	ANode* GenerateChildNode();
+	inline float GetSegmentLength() const { return SegmentLength; }
+	inline void SetSegmentLength(const float segmentLength) { SegmentLength = segmentLength; }
 };

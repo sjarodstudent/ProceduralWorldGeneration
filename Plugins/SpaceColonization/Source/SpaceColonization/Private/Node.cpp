@@ -27,12 +27,13 @@ ANode::ANode()
 		ArrowComponent->SetupAttachment(RootComponent);
 		ArrowComponent->bIsScreenSizeScaled = true;
 		ArrowComponent->SetSimulatePhysics(false);
+		ArrowComponent->SetRelativeScale3D(FVector(4.f, 4.f, 4.f));
 	}
 #endif // WITH_EDITORONLY_DATA
 }
 
 
-ANode* ANode::GenerateChildNode()
+ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 {
 	// spawn a new node in direction of nearby attractors
 
@@ -42,13 +43,25 @@ ANode* ANode::GenerateChildNode()
 		dir += CurrentNearbyAttractors[i]->GetActorLocation();
 	}
 	if (dir == FVector::ZeroVector)
+	{
 		dir = GetActorForwardVector();
+
+#if 0
+		// print spawned forward vector
+		FVector fw = GetActorForwardVector();
+		if(GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Root branch forward : %f, %f, %f"), fw.X, fw.Y, fw.Z));
+#endif
+
+	}
 	dir.Normalize();
 
 	dir *= SegmentLength;
 
-	ANode* child = GetWorld()->SpawnActor<ANode>(GetActorLocation() + dir, FRotator());
-	child->SegmentLength = SegmentLength;
+	// spawn the next node based on the computed direction
+	ANode* child = GetWorld()->SpawnActor<ANode>(GetActorLocation() + dir,
+		GetActorRotation());
+	
 	Children.Add(child);
 	return child;
 }

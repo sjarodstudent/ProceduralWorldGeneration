@@ -8,6 +8,7 @@
 
 class AAttractor;
 class ANode;
+class UArrowComponent;
 
 UCLASS()
 class SPACECOLONIZATION_API ASpaceColonizator : public AActor
@@ -15,23 +16,38 @@ class SPACECOLONIZATION_API ASpaceColonizator : public AActor
 	GENERATED_BODY()
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Arrow")
+	UArrowComponent* ArrowComponent;
+
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	TArray<AAttractor*> Leaves;
-	UPROPERTY(EditAnywhere, Category="Space Colonization")
-	TArray<ANode*> Branches;
 
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
-	float SegmentLength;
+	float SegmentLength = 10.f;
 
+	UPROPERTY(EditAnywhere, Category="Space Colonization")
+	TSubclassOf<ANode> BranchType = nullptr;
 	
 	ANode* RootBranch = nullptr;
 	
-public:	
+public:
+	
+	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
+	TArray<ANode*> Branches;
+
+	
 	// Sets default values for this actor's properties
 	ASpaceColonizator();
-	bool IsAnyBranchInAttractionDistance();
-	void GenerateTrunk();
+
+	void GrowRootBranch();
+
+	// tells if a specified branch is in a leaf's attraction distance
+	bool IsBranchInAnyLeafAttractionDistance(const ANode* branch);
+	
 	void ProcessLeaves();
+	void GrowTrunk();
+	
+	void GrowBranches();
 
 protected:
 	// Called when the game starts or when spawned
