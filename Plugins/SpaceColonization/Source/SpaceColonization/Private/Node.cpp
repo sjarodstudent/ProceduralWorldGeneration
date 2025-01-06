@@ -34,13 +34,15 @@ ANode::ANode()
 #endif // WITH_EDITORONLY_DATA
 }
 
-void ANode::SetSegmentLength(const float segmentLength)
+void ANode::SetOptions(const float segmentLength, const float maxThickness)
 {
 	SegmentLength = segmentLength;
 	
 	Mesh->SetRelativeLocation(FVector(SegmentLength, 0.f, 0.f));
 	FVector scale = Mesh->GetRelativeScale3D();
 	Mesh->SetRelativeScale3D(FVector(SegmentLength / 100.f * 2.f, scale.Y, scale.Z));
+
+	this->MaxThickness = maxThickness;
 }
 
 
@@ -82,7 +84,7 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 
 	// spawn the next node based on the computed direction
 	ANode* child = GetWorld()->SpawnActor<ANode>(GetActorLocation() + dir, rot);
-	child->SetSegmentLength(SegmentLength);
+	child->SetOptions(SegmentLength, MaxThickness);
 
 	// array in AACtor
 	Children.Add(child);
@@ -98,10 +100,13 @@ void ANode::ThickenParent()
 {
 	if (!parent)
 		return;
-
+	
 	float Growth = 1.002f;
 
 	FVector scale = parent->Mesh->GetRelativeScale3D();
+	if (scale.Y >= parent->MaxThickness || scale.Z >= parent->MaxThickness)
+		return;
+	
 	parent->Mesh->SetRelativeScale3D(FVector(scale.X, scale.Y * Growth, scale.Z * Growth));
 	parent->ThickenParent();
 }

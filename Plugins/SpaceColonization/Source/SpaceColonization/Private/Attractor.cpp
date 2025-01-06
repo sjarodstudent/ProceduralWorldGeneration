@@ -52,6 +52,10 @@ void AAttractor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	DrawDebugSphere(GetWorld(), GetActorLocation(), AttractionDistance, 30, FColor::Yellow, true, 999.f);
-	DrawDebugSphere(GetWorld(), GetActorLocation(), KillDistance, 30, FColor::Red, true, 999.f);
+	if (bDrawDebug)
+	{
+		DrawDebugSphere(GetWorld(), GetActorLocation(), AttractionDistance, 30, FColor::Yellow, true, 999.f);
+		DrawDebugSphere(GetWorld(), GetActorLocation(), KillDistance, 30, FColor::Red, true, 999.f);
+		
+	}
 }

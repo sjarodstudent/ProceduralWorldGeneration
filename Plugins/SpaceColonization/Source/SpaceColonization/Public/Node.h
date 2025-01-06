@@ -22,7 +22,10 @@ private:
 	float SegmentLength = 0.f;
 
 	ANode* parent = nullptr;
-	
+
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	float MaxThickness;
+
 public:
 	// Sets default values for this actor's properties
 	ANode();
@@ -40,7 +43,7 @@ public:
 	void ThickenParent();
 
 	inline float GetSegmentLength() const { return SegmentLength; }
-	void SetSegmentLength(const float segmentLength);
+	void SetOptions(const float segmentLength, const float maxThickness);
 };
 
 

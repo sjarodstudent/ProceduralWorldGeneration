@@ -3,10 +3,12 @@
 
 #include "SpaceColonizator.h"
 
+
 #include "Components/ArrowComponent.h"
 
 #include "Attractor.h"
 #include "Node.h"
+#include "AttractorCloud.h"
 
 // Sets default values
 ASpaceColonizator::ASpaceColonizator()
@@ -36,6 +38,17 @@ ASpaceColonizator::ASpaceColonizator()
 		Branches.Empty();
 }
 
+void ASpaceColonizator::LinkAttractorCloud()
+{
+	if (!LeafCloud)
+		return;
+
+	if (LeafCloud->GetAttractorArray().IsEmpty())
+		LeafCloud->GenerateAttractors();
+
+	Leaves.Append(LeafCloud->GetAttractorArray());
+}
+
 void ASpaceColonizator::GrowRootBranch()
 {
 	const FVector loc = GetActorLocation();
@@ -50,7 +63,7 @@ void ASpaceColonizator::GrowRootBranch()
 	// save root branch
 	RootBranch = Cast<ANode>(r);
 
-	RootBranch->SetSegmentLength(SegmentLength);
+	RootBranch->SetOptions(SegmentLength, MaxThickness);
 
 	// ensure the array is empty (it should but it is not)
 	if (!Branches.IsEmpty())
@@ -86,7 +99,7 @@ void ASpaceColonizator::GrowTrunk()
 	while (!IsBranchInAnyLeafAttractionDistance(LastBranch))
 	{
 		ANode* newBranch = LastBranch->GrowChildNode();
-		newBranch->SetSegmentLength(SegmentLength);
+		newBranch->SetOptions(SegmentLength, MaxThickness);
 
 		Branches.Add(newBranch);
 		LastBranch = newBranch;
@@ -164,6 +177,8 @@ void ASpaceColonizator::GrowBranches()
 void ASpaceColonizator::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LinkAttractorCloud();
 
 	// create root
 	GrowRootBranch();

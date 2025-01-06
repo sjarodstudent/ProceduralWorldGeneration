@@ -9,6 +9,7 @@
 class AAttractor;
 class ANode;
 class UArrowComponent;
+class AAttractorCloud;
 
 UCLASS()
 class SPACECOLONIZATION_API ASpaceColonizator : public AActor
@@ -22,6 +23,9 @@ private:
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	TArray<AAttractor*> Leaves;
 
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	AAttractorCloud* LeafCloud;
+
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	float SegmentLength = 100.f;
 
@@ -34,6 +38,9 @@ private:
 	float GrowTimer = 0.1f;
 	float GrowTimerStamp = 0.f;
 	
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	float MaxThickness = 2.f;
+
 public:
 	
 	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
@@ -42,6 +49,8 @@ public:
 	
 	// Sets default values for this actor's properties
 	ASpaceColonizator();
+
+	void LinkAttractorCloud();
 
 	void GrowRootBranch();
 

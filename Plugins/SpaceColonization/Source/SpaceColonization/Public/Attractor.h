@@ -34,5 +34,8 @@ public:
 
 	ANode* CurrentAttractedNode = nullptr;
 
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	bool bDrawDebug = false;
+
 	virtual void BeginPlay() override;
 };
