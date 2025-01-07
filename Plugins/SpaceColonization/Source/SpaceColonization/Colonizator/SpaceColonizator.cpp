@@ -14,7 +14,7 @@
 ASpaceColonizator::ASpaceColonizator()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = bGrowTemporally;
 
 	// transform may not be needed
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
@@ -81,17 +81,27 @@ void ASpaceColonizator::GrowRootBranch()
 #endif
 }
 
-bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const ANode* branch)
+bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const ANode* branch) const
 {
 	for (const auto& leaf : Leaves)
 	{
 		float d = leaf->GetDistanceTo(branch);
-		if (d <= leaf->AttractionDistance)
+		if (d <= leaf->GetAttractionDistance())
 			return true;
 	}
 	return false;
 }
 
+
+bool ASpaceColonizator::IsAnyBranchInAnyLeafAttractionDistance() const
+{
+	for (const auto& branch : Branches)
+	{
+		if (IsBranchInAnyLeafAttractionDistance(branch))
+			return true;
+	}
+	return false;
+}
 
 FVector ASpaceColonizator::GetLeavesAverageLocation() const
 {
@@ -205,17 +215,23 @@ void ASpaceColonizator::BeginPlay()
 
 	// generate next nodes
 
-	// while (Leaves.Num() > 0)
-	// {
-	// 	ProcessLeaves();
-	// 	GrowBranches();
-	// }
+	if (bGrowTemporally)
+	{
+		while (IsAnyBranchInAnyLeafAttractionDistance())
+		{
+			ProcessLeaves();
+			GrowBranches();
+		}
+		Leaves.Empty();
+	}
 }
 
 void ASpaceColonizator::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	if (bGrowTemporally)
+	{
 	if (GrowTimerStamp >= GrowTimer)
 	{
 		GrowTimerStamp = 0.f;
@@ -225,4 +241,6 @@ void ASpaceColonizator::Tick(float DeltaSeconds)
 	}
 
 	GrowTimerStamp += DeltaSeconds;
+		
+	}
 }

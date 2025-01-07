@@ -16,11 +16,8 @@ class SPACECOLONIZATION_API AAttractorCloud : public AActor
 private:
 	// generated attractors
 	TArray<AAttractor*> Attractors;
-	
-public:	
-	// Sets default values for this actor's properties
-	AAttractorCloud();
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
 	int AttractorCount = 100;
 
@@ -30,24 +27,20 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	TSubclassOf<AAttractor> AttractorType = nullptr;
 
+	// Sets default values for this actor's properties
+	AAttractorCloud();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+public:
 	void GenerateAttractors();
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
-	TArray<AAttractor*> GetAttractorArray() const;
-
+	inline TArray<AAttractor*> GetAttractorArray() const
+	{
+		return Attractors;
+	}
 };
-
-inline TArray<AAttractor*> AAttractorCloud::GetAttractorArray() const
-{
-	return Attractors;
-}
-

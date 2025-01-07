@@ -47,10 +47,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float MaxThickness = 1.25f;
 
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	bool bGrowTemporally = true;
+
 public:
 	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
 	TArray<ANode*> Branches;
-
 
 	// Sets default values for this actor's properties
 	ASpaceColonizator();
@@ -60,7 +62,8 @@ public:
 	void GrowRootBranch();
 
 	// tells if a specified branch is in a leaf's attraction distance
-	bool IsBranchInAnyLeafAttractionDistance(const ANode* branch);
+	bool IsBranchInAnyLeafAttractionDistance(const ANode* branch) const;
+	bool IsAnyBranchInAnyLeafAttractionDistance() const;
 
 	FVector GetLeavesAverageLocation() const;
 	void GrowTrunk();

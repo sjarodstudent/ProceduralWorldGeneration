@@ -8,8 +8,8 @@
 // Sets default values
 AAttractorCloud::AAttractorCloud()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
 }
@@ -37,14 +37,4 @@ void AAttractorCloud::GenerateAttractors()
 void AAttractorCloud::BeginPlay()
 {
 	Super::BeginPlay();
-
-
 }
-
-// Called every frame
-void AAttractorCloud::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

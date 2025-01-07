@@ -52,7 +52,7 @@ void ANode::Reset()
 	CurrentNearbyAttractors.Empty();
 }
 
-ANode* ANode::GrowChildNode(const FVector leavesAverageDirection, const float segmentLengthOverride)
+ANode* ANode::GrowChildNode(const FVector& leavesAverageDirection, const float segmentLengthOverride)
 {
 	// spawn a new node in direction of nearby attractors
 

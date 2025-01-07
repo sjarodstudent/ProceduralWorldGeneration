@@ -27,23 +27,25 @@ private:
 	float MaxThickness;
 
 public:
-	// Sets default values for this actor's properties
-	ANode();
-
 	TArray<AAttractor*> CurrentNearbyAttractors;
 
 	UPROPERTY(EditAnywhere, Category = "Rendering")
 	UStaticMeshComponent* Mesh;
 
+	// Sets default values for this actor's properties
+	ANode();
+
+	void SetOptions(const float segmentLength, const float maxThickness);
+
 	void Reset();
-
-	inline bool HasAttractors() const { return CurrentNearbyAttractors.Num() > 0; }
-	ANode* GrowChildNode(const FVector leavesAverageDirection = FVector::ZeroVector, const float segmentLengthOverride = 0.f);
-
+	ANode* GrowChildNode(const FVector& leavesAverageDirection = FVector::ZeroVector,
+	                     const float segmentLengthOverride = 0.f);
 	void ThickenParent();
 
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
+	inline bool HasAttractors() const { return CurrentNearbyAttractors.Num() > 0; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	inline float GetSegmentLength() const { return SegmentLength; }
-	void SetOptions(const float segmentLength, const float maxThickness);
 };
-
-

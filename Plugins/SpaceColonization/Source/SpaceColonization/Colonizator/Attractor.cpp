@@ -9,14 +9,17 @@
 // Sets default values
 AAttractor::AAttractor()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
+
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
-	
+
+#if 0
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	Mesh->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere"));
 	Mesh->SetStaticMesh(SphereMesh.Object);
+#endif
 }
 
 void AAttractor::Reset()
@@ -25,7 +28,7 @@ void AAttractor::Reset()
 	CurrentAttractedNode = nullptr;
 }
 
-float AAttractor::GetDistanceToCurrentAttractedNode()
+float AAttractor::GetDistanceToCurrentAttractedNode() const
 {
 	if (!CurrentAttractedNode)
 		return -1.f;
@@ -33,19 +36,25 @@ float AAttractor::GetDistanceToCurrentAttractedNode()
 	return GetDistanceTo(CurrentAttractedNode);
 }
 
-bool AAttractor::IsInAttractionRange()
+bool AAttractor::IsInAttractionRange() const
 {
 	return GetDistanceToCurrentAttractedNode() <= AttractionDistance &&
 		GetDistanceToCurrentAttractedNode() > KillDistance;
 }
 
-bool AAttractor::IsReached()
+bool AAttractor::IsReached() const
 {
 	// is not reached since it is not attracted
 	if (GetDistanceToCurrentAttractedNode() < 0.f)
 		return false;
-	
+
 	return GetDistanceToCurrentAttractedNode() <= KillDistance;
+}
+
+void AAttractor::DrawDebug()
+{
+	DrawDebugSphere(GetWorld(), GetActorLocation(), AttractionDistance, 30, FColor::Yellow, true, 999.f);
+	DrawDebugSphere(GetWorld(), GetActorLocation(), KillDistance, 30, FColor::Red, true, 999.f);
 }
 
 void AAttractor::BeginPlay()
@@ -54,8 +63,6 @@ void AAttractor::BeginPlay()
 
 	if (bDrawDebug)
 	{
-		DrawDebugSphere(GetWorld(), GetActorLocation(), AttractionDistance, 30, FColor::Yellow, true, 999.f);
-		DrawDebugSphere(GetWorld(), GetActorLocation(), KillDistance, 30, FColor::Red, true, 999.f);
-		
+		DrawDebug();
 	}
 }
