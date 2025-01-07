@@ -21,11 +21,11 @@ public:
 	// Sets default values for this actor's properties
 	AAttractorCloud();
 
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	int AttractorCount = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
+	int AttractorCount = 100;
 
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	float AttractorRadius = 0.05f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
+	float AttractorRadius = 1000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	TSubclassOf<AAttractor> AttractorType = nullptr;

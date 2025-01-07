@@ -20,6 +20,12 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Arrow")
 	UArrowComponent* ArrowComponent;
 
+	/**
+	 * whether the trunk should follow the arrow component or and average location of all the leaves
+	 */
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	bool bTrunkFollowArrow = false;
+
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	TArray<AAttractor*> Leaves;
 
@@ -27,26 +33,25 @@ private:
 	AAttractorCloud* LeafCloud;
 
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
-	float SegmentLength = 100.f;
+	float SegmentLength = 15.f;
 
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	TSubclassOf<ANode> BranchType = nullptr;
-	
+
 	ANode* RootBranch = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float GrowTimer = 0.1f;
 	float GrowTimerStamp = 0.f;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	float MaxThickness = 2.f;
+	float MaxThickness = 1.25f;
 
 public:
-	
 	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
 	TArray<ANode*> Branches;
 
-	
+
 	// Sets default values for this actor's properties
 	ASpaceColonizator();
 
@@ -56,9 +61,10 @@ public:
 
 	// tells if a specified branch is in a leaf's attraction distance
 	bool IsBranchInAnyLeafAttractionDistance(const ANode* branch);
-	
+
+	FVector GetLeavesAverageLocation() const;
 	void GrowTrunk();
-	
+
 	void ProcessLeaves();
 	void GrowBranches();
 
@@ -67,5 +73,4 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
-
 };

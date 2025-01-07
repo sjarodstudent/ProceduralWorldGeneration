@@ -49,6 +49,7 @@ void ASpaceColonizator::LinkAttractorCloud()
 	Leaves.Append(LeafCloud->GetAttractorArray());
 }
 
+
 void ASpaceColonizator::GrowRootBranch()
 {
 	const FVector loc = GetActorLocation();
@@ -92,13 +93,28 @@ bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const ANode* branch)
 }
 
 
+FVector ASpaceColonizator::GetLeavesAverageLocation() const
+{
+	FVector dir = FVector::ZeroVector;
+	for (const auto& leaf : Leaves)
+	{
+		dir += leaf->GetActorLocation();
+	}
+	dir.Normalize();
+	return dir;
+}
+
 void ASpaceColonizator::GrowTrunk()
 {
 	ANode* LastBranch = RootBranch;
 
+	FVector leavesAverageLocation = FVector::ZeroVector;
+	if (!bTrunkFollowArrow)
+		leavesAverageLocation = GetLeavesAverageLocation();
+
 	while (!IsBranchInAnyLeafAttractionDistance(LastBranch))
 	{
-		ANode* newBranch = LastBranch->GrowChildNode();
+		ANode* newBranch = LastBranch->GrowChildNode(leavesAverageLocation);
 		newBranch->SetOptions(SegmentLength, MaxThickness);
 
 		Branches.Add(newBranch);

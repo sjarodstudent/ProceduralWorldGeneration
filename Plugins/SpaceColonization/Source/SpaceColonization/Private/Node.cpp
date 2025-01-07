@@ -37,7 +37,7 @@ ANode::ANode()
 void ANode::SetOptions(const float segmentLength, const float maxThickness)
 {
 	SegmentLength = segmentLength;
-	
+
 	Mesh->SetRelativeLocation(FVector(SegmentLength, 0.f, 0.f));
 	FVector scale = Mesh->GetRelativeScale3D();
 	Mesh->SetRelativeScale3D(FVector(SegmentLength / 100.f * 2.f, scale.Y, scale.Z));
@@ -46,14 +46,13 @@ void ANode::SetOptions(const float segmentLength, const float maxThickness)
 }
 
 
-
 void ANode::Reset()
 {
 	Super::Reset();
 	CurrentNearbyAttractors.Empty();
 }
 
-ANode* ANode::GrowChildNode(const float segmentLengthOverride)
+ANode* ANode::GrowChildNode(const FVector leavesAverageDirection, const float segmentLengthOverride)
 {
 	// spawn a new node in direction of nearby attractors
 
@@ -63,11 +62,14 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 		// add direction to the attractor
 		dir += CurrentNearbyAttractors[i]->GetActorLocation() - GetActorLocation();
 	}
-	
+
 	// if no nearby attractors, grow based on the parent direction
 	if (dir == FVector::ZeroVector)
 	{
-		dir = GetActorForwardVector();
+		if (leavesAverageDirection == FVector::ZeroVector)
+			dir = GetActorForwardVector();
+		else
+			dir = leavesAverageDirection;
 
 #if 0
 		// print spawned forward vector
@@ -75,7 +77,6 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 		if(GEngine)
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("Root branch forward : %f, %f, %f"), fw.X, fw.Y, fw.Z));
 #endif
-
 	}
 	dir.Normalize();
 	FRotator rot = dir.Rotation();
@@ -89,7 +90,7 @@ ANode* ANode::GrowChildNode(const float segmentLengthOverride)
 	// array in AACtor
 	Children.Add(child);
 	child->parent = this;
-	
+
 	Reset();
 
 	child->ThickenParent();
@@ -100,16 +101,13 @@ void ANode::ThickenParent()
 {
 	if (!parent)
 		return;
-	
+
 	float Growth = 1.002f;
 
 	FVector scale = parent->Mesh->GetRelativeScale3D();
 	if (scale.Y >= parent->MaxThickness || scale.Z >= parent->MaxThickness)
 		return;
-	
+
 	parent->Mesh->SetRelativeScale3D(FVector(scale.X, scale.Y * Growth, scale.Z * Growth));
 	parent->ThickenParent();
 }
-
-
-
