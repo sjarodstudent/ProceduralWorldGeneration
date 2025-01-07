@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Attractor.generated.h"
 
-class ANode;
+class SpaceColonizationNode;
 class UStaticMeshComponent;
 
 UCLASS()
@@ -30,7 +30,7 @@ private:
 #endif
 
 public:
-	ANode* CurrentAttractedNode = nullptr;
+	SpaceColonizationNode* CurrentAttractedNode = nullptr;
 
 	// Sets default values for this actor's properties
 	AAttractor();

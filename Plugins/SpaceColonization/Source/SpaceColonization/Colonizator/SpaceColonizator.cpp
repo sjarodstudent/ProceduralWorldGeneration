@@ -6,8 +6,10 @@
 
 #include "Components/ArrowComponent.h"
 
-#include "Attractor.h"
 #include "Node.h"
+#include "Actor/BranchActor.h"
+
+#include "Attractor.h"
 #include "AttractorCloud.h"
 
 // Sets default values
@@ -38,6 +40,14 @@ ASpaceColonizator::ASpaceColonizator()
 		Branches.Empty();
 }
 
+ASpaceColonizator::~ASpaceColonizator()
+{
+	for (SpaceColonizationNode* branch : Branches)
+	{
+		delete Branches;
+	}
+}
+
 void ASpaceColonizator::LinkAttractorCloud()
 {
 	if (!LeafCloud)
@@ -55,16 +65,10 @@ void ASpaceColonizator::GrowRootBranch()
 	const FVector loc = GetActorLocation();
 	const FRotator rot = GetActorRotation();
 
-	FActorSpawnParameters spawnParams;
-	spawnParams.bNoFail = true;
-	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	AActor* r = GetWorld()->SpawnActor(BranchType, &loc, &rot, spawnParams);
-	check(r);
-
 	// save root branch
-	RootBranch = Cast<ANode>(r);
-
-	RootBranch->SetOptions(SegmentLength, MaxThickness);
+	RootBranch = new SpaceColonizationNode();
+	RootBranch->SetSegmentLength(SegmentLength);
+	RootBranch->SetMaxThickness(MaxThickness);
 
 	// ensure the array is empty (it should but it is not)
 	if (!Branches.IsEmpty())
@@ -79,9 +83,15 @@ void ASpaceColonizator::GrowRootBranch()
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Root branch forward : %f, %f, %f"), fw.X, fw.Y, fw.Z));
 #endif
+
+	FActorSpawnParameters spawnParams;
+	spawnParams.bNoFail = true;
+	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AActor* r = GetWorld()->SpawnActor(BranchType, &loc, &rot, spawnParams);
+	check(r);
 }
 
-bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const ANode* branch) const
+bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const SpaceColonizationNode* branch) const
 {
 	for (const auto& leaf : Leaves)
 	{
@@ -116,7 +126,7 @@ FVector ASpaceColonizator::GetLeavesAverageLocation() const
 
 void ASpaceColonizator::GrowTrunk()
 {
-	ANode* LastBranch = RootBranch;
+	SpaceColonizationNode* LastBranch = RootBranch;
 
 	FVector leavesAverageLocation = FVector::ZeroVector;
 	if (!bTrunkFollowArrow)
@@ -124,7 +134,7 @@ void ASpaceColonizator::GrowTrunk()
 
 	while (!IsBranchInAnyLeafAttractionDistance(LastBranch))
 	{
-		ANode* newBranch = LastBranch->GrowChildNode(leavesAverageLocation);
+		SpaceColonizationNode* newBranch = LastBranch->GrowChildNode(leavesAverageLocation);
 		newBranch->SetOptions(SegmentLength, MaxThickness);
 
 		Branches.Add(newBranch);
@@ -145,7 +155,7 @@ void ASpaceColonizator::ProcessLeaves()
 
 		for (int j = 0; j < Branches.Num(); ++j)
 		{
-			ANode* branch = Branches[j];
+			SpaceColonizationNode* branch = Branches[j];
 
 			float d = FVector::Dist(branch->GetActorLocation(), leaf->GetActorLocation());
 			if (d < minDistance)
@@ -178,7 +188,7 @@ void ASpaceColonizator::GrowBranches()
 	int constSize = Branches.Num();
 	for (int i = 0; i < constSize; ++i)
 	{
-		ANode* branch = Branches[i];
+		SpaceColonizationNode* branch = Branches[i];
 
 		if (branch->HasAttractors())
 		{
@@ -192,7 +202,7 @@ void ASpaceColonizator::GrowBranches()
 			}
 #endif
 
-			ANode* child = branch->GrowChildNode();
+			SpaceColonizationNode* child = branch->GrowChildNode();
 			Branches.Add(child);
 		}
 	}
@@ -232,15 +242,14 @@ void ASpaceColonizator::Tick(float DeltaSeconds)
 
 	if (bGrowTemporally)
 	{
-	if (GrowTimerStamp >= GrowTimer)
-	{
-		GrowTimerStamp = 0.f;
+		if (GrowTimerStamp >= GrowTimer)
+		{
+			GrowTimerStamp = 0.f;
 
-		ProcessLeaves();
-		GrowBranches();
-	}
+			ProcessLeaves();
+			GrowBranches();
+		}
 
-	GrowTimerStamp += DeltaSeconds;
-		
+		GrowTimerStamp += DeltaSeconds;
 	}
 }

@@ -7,45 +7,31 @@
 #include "Node.generated.h"
 
 class AAttractor;
-class UStaticMeshComponent;
-class UArrowComponent;
 
-UCLASS()
-class SPACECOLONIZATION_API ANode : public AActor
+class SPACECOLONIZATION_API SpaceColonizationNode
 {
-	GENERATED_BODY()
-
 private:
-	UPROPERTY(EditAnywhere, Category = "Arrow")
-	UArrowComponent* ArrowComponent;
+	FTransform transform;
 
+	SpaceColonizationNode* parent = nullptr;
+	TArray<SpaceColonizationNode*> children;
+	
 	float SegmentLength = 0.f;
-
-	ANode* parent = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	float MaxThickness;
+	float MaxThickness = 1.25f;
 
 public:
+	~SpaceColonizationNode();
+	
 	TArray<AAttractor*> CurrentNearbyAttractors;
 
-	UPROPERTY(EditAnywhere, Category = "Rendering")
-	UStaticMeshComponent* Mesh;
-
-	// Sets default values for this actor's properties
-	ANode();
-
-	void SetOptions(const float segmentLength, const float maxThickness);
-
-	void Reset();
-	ANode* GrowChildNode(const FVector& leavesAverageDirection = FVector::ZeroVector,
-	                     const float segmentLengthOverride = 0.f);
-	void ThickenParent();
+	SpaceColonizationNode* GrowChildNode(const FVector& leavesAverageDirection = FVector::ZeroVector);
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	inline bool HasAttractors() const { return CurrentNearbyAttractors.Num() > 0; }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	inline float GetSegmentLength() const { return SegmentLength; }
+	inline void SetSegmentLength(const float& segmentLength) { SegmentLength = segmentLength; }
+
+	inline float GetMaxThickness() const { return MaxThickness; }
+	inline void SetMaxThickness(const float& maxThickness) { MaxThickness = maxThickness; }
 };
