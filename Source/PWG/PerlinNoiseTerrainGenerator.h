@@ -48,7 +48,7 @@ public:
     UFUNCTION(CallInEditor, Category = "Perlin Noise")
     void UpdatePerlinNoiseTexture();
 
-    void GenerateTerrain(int32 StartX, int32 StartY);
+    void GenerateTerrain(int StartX, int StartY);
 
     void GenerateNeighboorTerrain();
 

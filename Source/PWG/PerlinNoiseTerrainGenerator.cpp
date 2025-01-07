@@ -24,7 +24,7 @@ void APerlinNoiseTerrainGenerator::Tick(float DeltaTime)
     //UpdateLoadedTerrains();
 }
 
-void APerlinNoiseTerrainGenerator::GenerateTerrain(int32 StartX, int32 StartY)
+void APerlinNoiseTerrainGenerator::GenerateTerrain(int StartX, int StartY)
 {
     TArray<FVector> tempVertices; TArray<int> tempTriangles; TArray<FVector2D> tempUV;
 
@@ -36,9 +36,9 @@ void APerlinNoiseTerrainGenerator::GenerateTerrain(int32 StartX, int32 StartY)
     TrianglesArray.Insert(tempTriangles, TrianglesArray.Num());
     UVArray.Insert(tempUV, UVArray.Num());
 
-    for (int32 y = 0; y <= Height; ++y)
+    for (int y = 0; y <= Height; ++y)
     {
-        for (int32 x = 0; x <= Width; ++x)
+        for (int x = 0; x <= Width; ++x)
         {
             float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
             float HeightValue = NoiseValue * HeightMultiplier;
@@ -48,14 +48,14 @@ void APerlinNoiseTerrainGenerator::GenerateTerrain(int32 StartX, int32 StartY)
         }
     }
 
-    for (int32 y = 0; y < Height; ++y)
+    for (int y = 0; y < Height; ++y)
     {
-        for (int32 x = 0; x < Width; ++x)
+        for (int x = 0; x < Width; ++x)
         {
-            int32 Index1 = x + (y * (Width + 1));
-            int32 Index2 = Index1 + 1;
-            int32 Index3 = Index1 + (Width + 1);
-            int32 Index4 = Index3 + 1;
+            int Index1 = x + (y * (Width + 1));
+            int Index2 = Index1 + 1;
+            int Index3 = Index1 + (Width + 1);
+            int Index4 = Index3 + 1;
 
             TrianglesArray[TrianglesArray.Num() - 1].Add(Index1);
             TrianglesArray[TrianglesArray.Num() - 1].Add(Index3);
@@ -72,8 +72,8 @@ void APerlinNoiseTerrainGenerator::GenerateTerrain(int32 StartX, int32 StartY)
     if (proceduralMesh)
     {
         FString MeshName = FString::Printf(TEXT("ProceduralMesh%d"), TerrainIndex);
-        proceduralMesh->RegisterComponentWithWorld(GetWorld()); // Enregistre le composant dans le monde
-        proceduralMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform); // Attache le composant au RootComponent
+        proceduralMesh->RegisterComponentWithWorld(GetWorld());
+        proceduralMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 
         proceduralMesh->SetWorldLocation(FVector(0, 0, 0));
         proceduralMesh->SetWorldScale3D(FVector(1, 1, 1));
@@ -105,14 +105,12 @@ void APerlinNoiseTerrainGenerator::GenerateTerrain(int32 StartX, int32 StartY)
 
 void APerlinNoiseTerrainGenerator::GenerateNeighboorTerrain()
 {
-    // Générer le terrain principal
     GenerateTerrain(0, 0);
 
-    // Générer les terrains voisins
-    GenerateTerrain(Width, 0); // Terrain à droite
-    GenerateTerrain(-Width, 0); // Terrain à gauche
-    GenerateTerrain(0, Height); // Terrain en haut
-    GenerateTerrain(0, -Height); // Terrain en bas
+    GenerateTerrain(Width, 0);
+    GenerateTerrain(-Width, 0);
+    GenerateTerrain(0, Height);
+    GenerateTerrain(0, -Height);
     GenerateTerrain(Width, Height);
     GenerateTerrain(-Width, Height);
     GenerateTerrain(Width, -Height);
