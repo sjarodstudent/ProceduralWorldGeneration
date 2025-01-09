@@ -70,6 +70,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	bool bGrowTemporally = true;
 
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	class UStaticMesh* LeafStaticMesh;
+
 	UFUNCTION()
 	void OnBranchSpawnedDo(USpaceColonizationNode* branch);
 

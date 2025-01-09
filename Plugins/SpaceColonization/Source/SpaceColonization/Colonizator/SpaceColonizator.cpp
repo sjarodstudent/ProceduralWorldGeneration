@@ -11,6 +11,7 @@
 
 #include "Attractor.h"
 #include "AttractorCloud.h"
+#include "MovieSceneTracksComponentTypes.h"
 
 // Sets default values
 ASpaceColonizator::ASpaceColonizator()
@@ -209,7 +210,14 @@ void ASpaceColonizator::ProcessLeaves()
 			{
 				FVector leafLoc = toRemove->GetActorLocation();
 				FRotator leafRot = toRemove->GetActorRotation();
+#if 0 // TODO : create static mesh instead of spawning a "leaf actor"
+				UStaticMeshComponent* leafMesh = NewObject<UStaticMeshComponent>(UStaticMeshComponent::StaticClass(), TEXT("Static Mesh"));
+				leafMesh->RegisterComponent();
+				leafMesh->SetStaticMesh(LeafStaticMesh);
+				leafMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+#else
 				GetWorld()->SpawnActor(ActorLeafType, &leafLoc, &leafRot);
+#endif
 			}
 
 			Leaves.Remove(toRemove);
