@@ -73,14 +73,14 @@ public:
 
     void GenerateTreePoint();
 
+    void LerpPixelColor(int x, int y, float NormalizedHeight, float WaterHeight, float GrassHeight, uint8* Data);
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
 
     int SpawnXCastleLimit = Width - 50;
     int SpawnYCastleLimit = Height - 50;
-
-    UStaticMeshComponent* SphereMesh;
 
     UMaterialInstanceDynamic* MyMaterial;
 

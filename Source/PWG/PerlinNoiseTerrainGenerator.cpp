@@ -83,7 +83,6 @@ void APerlinNoiseTerrainGenerator::GenerateTerrain(int StartX, int StartY)
 
     if (proceduralMesh)
     {
-        FString MeshName = FString::Printf(TEXT("ProceduralMesh%d"), TerrainIndex);
         proceduralMesh->RegisterComponentWithWorld(GetWorld());
         proceduralMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 
@@ -95,8 +94,7 @@ void APerlinNoiseTerrainGenerator::GenerateTerrain(int StartX, int StartY)
     else
         UE_LOG(LogTemp, Error, TEXT("Failed to create UProceduralMeshComponent"));
 
-    if (TerrainIndex < ProceduralMeshArray.Num())
-        ProceduralMeshArray[TerrainIndex]->CreateMeshSection(0, VerticesArray[VerticesArray.Num() - 1], TrianglesArray[TrianglesArray.Num() - 1], TArray<FVector>(), UVArray[UVArray.Num() - 1], TArray<FColor>(), TArray<FProcMeshTangent>(), true);
+    ProceduralMeshArray[TerrainIndex]->CreateMeshSection(0, VerticesArray[VerticesArray.Num() - 1], TrianglesArray[TrianglesArray.Num() - 1], TArray<FVector>(), UVArray[UVArray.Num() - 1], TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 
     UTexture2D* PerlinTexture = GeneratePerlinNoiseTexture(StartX, StartY);
 
@@ -143,7 +141,7 @@ void APerlinNoiseTerrainGenerator::UpdatePerlinNoiseTexture()
     }
 }
 
-UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture(int32 StartX, int32 StartY)
+UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture(int StartX, int StartY)
 {
     UTexture2D* PerlinTexture = UTexture2D::CreateTransient(Width, Height);
 
@@ -161,61 +159,14 @@ UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture(int32 Start
     float WaterHeight = 0.3f;
     float GrassHeight = 0.8f;
 
-    for (int32 y = 0; y < Height; ++y)
+    for (int y = 0; y < Height; ++y)
     {
-        for (int32 x = 0; x < Width; ++x)
+        for (int x = 0; x < Width; ++x)
         {
             float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
             float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
 
-            uint8 R = 0, G = 0, B = 0;
-
-            /*if (NormalizedHeight < WaterHeight)
-            {
-                R = 255;
-                G = 0;
-                B = 0;
-            }
-            else if (NormalizedHeight < GrassHeight)
-            {
-                R = 34;
-                G = 139;
-                B = 34;
-            }
-            else
-            {
-                R = 255;
-                G = 255;
-                B = 255;
-            }*/
-
-            if (NormalizedHeight < WaterHeight)
-            {
-                float Factor = NormalizedHeight / WaterHeight;
-                R = FMath::Lerp(150, 255, Factor);
-                G = FMath::Lerp(0, 130, Factor);
-                B = FMath::Lerp(0, 70, Factor);
-            }
-            else if (NormalizedHeight < GrassHeight)
-            {
-                float Factor = (NormalizedHeight - WaterHeight) / (GrassHeight - WaterHeight);
-                R = FMath::Lerp(34, 85, Factor);
-                G = FMath::Lerp(139, 255, Factor);
-                B = FMath::Lerp(34, 85, Factor);
-            }
-            else
-            {
-                float Factor = (NormalizedHeight - GrassHeight) / (1.0f - GrassHeight);
-                R = FMath::Lerp(200, 255, Factor);
-                G = FMath::Lerp(200, 255, Factor);
-                B = FMath::Lerp(200, 255, Factor);
-            }
-
-            int32 PixelIndex = (y * Width + x) * 4;
-            Data[PixelIndex + 0] = R;
-            Data[PixelIndex + 1] = G;
-            Data[PixelIndex + 2] = B;
-            Data[PixelIndex + 3] = 255;
+            LerpPixelColor(x, y, NormalizedHeight, WaterHeight, GrassHeight, Data);
         }
     }
 
@@ -231,7 +182,6 @@ UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture()
     if (!PerlinTexture)
         return nullptr;
 
-    //PerlinTexture->GetPlatformData()->Mips.SetNum(1);
     FTexture2DMipMap& Mip = PerlinTexture->GetPlatformData()->Mips[0];
     Mip.SizeX = Width;
     Mip.SizeY = Height;
@@ -288,9 +238,6 @@ void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
         int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
         CastleLocation = GrassLocations[RandomIndex];
 
-        SphereMesh = NewObject<UStaticMeshComponent>(this);
-
-
         FHitResult Hit;
         GetWorld()->LineTraceSingleByChannel(Hit, CastleLocation, FVector(CastleLocation.X, CastleLocation.Y, CastleLocation.Z - 50000), ECollisionChannel::ECC_Visibility);
 
@@ -301,60 +248,8 @@ void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
         FMatrix matrix = FRotationMatrix::MakeFromZ(Hit.Normal);
 
         castle->SetActorRotation(matrix.Rotator());
-        
-
-        /*if (SphereMesh)
-        {
-            SphereMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere")));
-            SphereMesh->SetWorldLocation(CastleLocation);
-            SphereMesh->SetWorldScale3D(FVector(50, 50, 50));
-            SphereMesh->RegisterComponentWithWorld(GetWorld());
-            SphereMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-        }*/
     }
 }
-
-void APerlinNoiseTerrainGenerator::GenerateTreePoint()
-{
-
-}
-
-/*void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
-{
-    TArray<FVector> GrassLocations;
-
-    for (int y = 0; y < Height; ++y)
-    {
-        for (int x = 0; x < Width; ++x)
-        {
-            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
-            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
-
-            if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f && IsAreaFlat(x, y))
-                GrassLocations.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, NormalizedHeight * HeightMultiplier));
-        }
-    }
-
-    if (GrassLocations.Num() > 0)
-    {
-        int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
-        CastleLocation = GrassLocations[RandomIndex];
-
-        SphereMesh = NewObject<UStaticMeshComponent>(this);
-
-        GetWorld()->SpawnActor<AActor>(CastleBP, CastleLocation, FRotator(0,0,0));
-
-        if (SphereMesh)
-        {
-            //UWorld::SpawnActor();
-            SphereMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Assets/BP/Sphere.Sphere")));
-            SphereMesh->SetWorldLocation(CastleLocation);
-            SphereMesh->SetWorldScale3D(FVector(50, 50, 50));
-            SphereMesh->RegisterComponentWithWorld(GetWorld());
-            SphereMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-        }
-    }
-}*/
 
 bool APerlinNoiseTerrainGenerator::IsAreaFlat(int32 X, int32 Y)
 {
@@ -374,4 +269,37 @@ bool APerlinNoiseTerrainGenerator::IsAreaFlat(int32 X, int32 Y)
     }
 
     return true;
+}
+
+void APerlinNoiseTerrainGenerator::LerpPixelColor(int x, int y, float NormalizedHeight, float WaterHeight, float GrassHeight, uint8* Data)
+{
+    int R = 0, G = 0, B = 0;
+
+    if (NormalizedHeight < WaterHeight)
+    {
+        float Factor = NormalizedHeight / WaterHeight;
+        R = FMath::Lerp(150, 255, Factor);
+        G = FMath::Lerp(0, 130, Factor);
+        B = FMath::Lerp(0, 70, Factor);
+    }
+    else if (NormalizedHeight < GrassHeight)
+    {
+        float Factor = (NormalizedHeight - WaterHeight) / (GrassHeight - WaterHeight);
+        R = FMath::Lerp(34, 85, Factor);
+        G = FMath::Lerp(139, 255, Factor);
+        B = FMath::Lerp(34, 85, Factor);
+    }
+    else
+    {
+        float Factor = (NormalizedHeight - GrassHeight) / (1.0f - GrassHeight);
+        R = FMath::Lerp(200, 255, Factor);
+        G = FMath::Lerp(200, 255, Factor);
+        B = FMath::Lerp(200, 255, Factor);
+    }
+
+    int PixelIndex = (y * Width + x) * 4;
+    Data[PixelIndex + 0] = R;
+    Data[PixelIndex + 1] = G;
+    Data[PixelIndex + 2] = B;
+    Data[PixelIndex + 3] = 255;
 }
