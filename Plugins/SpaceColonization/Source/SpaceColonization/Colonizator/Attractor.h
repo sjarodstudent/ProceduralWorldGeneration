@@ -16,7 +16,7 @@ class SPACECOLONIZATION_API AAttractor : public AActor
 
 private:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	float AttractionDistance = 500.f;
+	float AttractionDistance = 1000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float KillDistance = 100.f;
