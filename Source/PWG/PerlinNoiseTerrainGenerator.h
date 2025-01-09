@@ -42,10 +42,10 @@ public:
     int CastleCount = 1;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
-    float Radius = 50;
+    int TreeCount = 10.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
-    float MaxSlope = 0.1;
+    float Radius = 10000.f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
     TSubclassOf<AActor> CastleBP;
@@ -56,10 +56,7 @@ public:
 
     UTexture2D* GeneratePerlinNoiseTexture();
 
-    UTexture2D* GeneratePerlinNoiseTexture(int32 StartX, int32 StartY);
-
-    UFUNCTION(CallInEditor, Category = "Perlin Noise")
-    void UpdatePerlinNoiseTexture();
+    UTexture2D* GeneratePerlinNoiseTexture(int StartX, int StartY);
 
     void GenerateTerrain(int StartX, int StartY);
 
@@ -69,9 +66,11 @@ public:
 
     int GetRandomValue();
 
-    bool IsAreaFlat(int32 X, int32 Y);
+    void GenerateTreePoints(int StartX, int StartY);
 
-    void GenerateTreePoint();
+    TArray<FVector> TreePoints;
+
+    bool IsPointValidForTree(const FVector& Point, float MinDistance);
 
     void LerpPixelColor(int x, int y, float NormalizedHeight, float WaterHeight, float GrassHeight, uint8* Data);
 
@@ -99,5 +98,5 @@ protected:
 
     UMaterialInstanceDynamic* MyMaterialPerlinNoise;
 
-    FVector CastleLocation;
+    TArray<FVector> CastleLocations;
 };

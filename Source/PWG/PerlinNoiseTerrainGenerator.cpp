@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "PerlinNoiseTerrainGenerator.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -27,6 +26,9 @@ void APerlinNoiseTerrainGenerator::BeginPlay()
 
     for(int i = 0; i < CastleCount; i++)
         GenerateCastlePoint(GetRandomValue(), GetRandomValue());
+
+    for (int i = 0; i < TreeCount; i++)
+        GenerateTreePoints(GetRandomValue(), GetRandomValue());
 }
 
 void APerlinNoiseTerrainGenerator::Tick(float DeltaTime)
@@ -127,20 +129,6 @@ void APerlinNoiseTerrainGenerator::GenerateNeighboorTerrain()
     GenerateTerrain(-Width, -Height);
 }
 
-void APerlinNoiseTerrainGenerator::UpdatePerlinNoiseTexture()
-{
-    UTexture2D* PerlinTexture = GeneratePerlinNoiseTexture();
-
-    if (PerlinTexture)
-    {
-        MyMaterialPerlinNoise = UMaterialInstanceDynamic::Create(ParentMaterial, NULL);
-        MyMaterialPerlinNoise->SetTextureParameterValue(TEXT("PerlinTextureSample"), PerlinTexture);
-
-        ProceduralMeshArray[0]->SetMaterial(0, MyMaterialPerlinNoise);
-        ProceduralMeshArray[0]->SetCastShadow(false);
-    }
-}
-
 UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture(int StartX, int StartY)
 {
     UTexture2D* PerlinTexture = UTexture2D::CreateTransient(Width, Height);
@@ -218,15 +206,12 @@ void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
 {
     TArray<FVector> GrassLocations;
 
-    int randIndex = FMath::RandRange(0, ProceduralMeshArray.Num() - 1);
-    UProceduralMeshComponent* currentTerrain = ProceduralMeshArray[randIndex];
-
     for (int y = 0; y < Height; ++y)
     {
         for (int x = 0; x < Width; ++x)
         {
-            float noiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
-            float NormalizedHeight = (noiseValue + 1.0f) * 0.5f;
+            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
+            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
 
             if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f)
                 GrassLocations.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, HeightMultiplier));
@@ -236,30 +221,9 @@ void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
     if (GrassLocations.Num() > 0)
     {
         int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
-        CastleLocation = GrassLocations[RandomIndex];
-
-        AActor* castle = GetWorld()->SpawnActor<AActor>(CastleBP, CastleLocation, FRotator(0, 0, 0));
+        CastleLocations.Add(GrassLocations[RandomIndex]);
+        GetWorld()->SpawnActor<AActor>(CastleBP, GrassLocations[RandomIndex], FRotator(0, 0, 0));
     }
-}
-
-bool APerlinNoiseTerrainGenerator::IsAreaFlat(int32 X, int32 Y)
-{
-    float CenterHeight = FMath::PerlinNoise2D(FVector2D((X + Seed) / CellSize, (Y + Seed) / CellSize)) * HeightMultiplier;
-
-    for (int32 dy = -Radius; dy <= Radius; ++dy)
-    {
-        for (int32 dx = -Radius; dx <= Radius; ++dx)
-        {
-            if (dx == 0 && dy == 0)
-                continue;
-
-            float NeighborHeight = FMath::PerlinNoise2D(FVector2D((X + dx + Seed) / CellSize, (Y + dy + Seed) / CellSize)) * HeightMultiplier;
-            if (FMath::Abs(NeighborHeight - CenterHeight) > MaxSlope * CellSize)
-                return false;
-        }
-    }
-
-    return true;
 }
 
 void APerlinNoiseTerrainGenerator::LerpPixelColor(int x, int y, float NormalizedHeight, float WaterHeight, float GrassHeight, uint8* Data)
@@ -293,4 +257,57 @@ void APerlinNoiseTerrainGenerator::LerpPixelColor(int x, int y, float Normalized
     Data[PixelIndex + 1] = G;
     Data[PixelIndex + 2] = B;
     Data[PixelIndex + 3] = 255;
+}
+
+void APerlinNoiseTerrainGenerator::GenerateTreePoints(int StartX, int StartY)
+{
+    TArray<FVector> Trees;
+
+    for (int y = 0; y < Height; ++y)
+    {
+        for (int x = 0; x < Width; ++x)
+        {
+            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
+            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
+
+            if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f)
+                Trees.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, HeightMultiplier));
+        }
+    }
+
+    if (Trees.Num() > 0)
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            int RandomIndex = FMath::RandRange(0, Trees.Num() - 1);
+
+            if (IsPointValidForTree(Trees[RandomIndex], Radius))
+            {
+                TreePoints.Add(Trees[RandomIndex]);
+
+                DrawDebugSphere(GetWorld(), Trees[RandomIndex], 5000.f, 10, FColor::Red, true);
+
+                break;
+            }
+        }
+    }
+}
+
+bool APerlinNoiseTerrainGenerator::IsPointValidForTree(const FVector& Point, float MinDistance)
+{
+    for (const FVector& CastleLocation : CastleLocations)
+    {
+        float test = FVector::Dist(Point, CastleLocation);
+
+        if (test < MinDistance)
+            return false;
+    }
+
+    for (const FVector& TreePoint : TreePoints)
+    {
+        if (FVector::Dist(Point, TreePoint) < MinDistance)
+            return false;
+    }
+
+    return true;
 }
