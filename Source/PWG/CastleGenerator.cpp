@@ -17,7 +17,10 @@ ACastleGenerator::ACastleGenerator()
 void ACastleGenerator::BeginPlay()
 {
 	Super::BeginPlay();
+	GenerateSize();
 	GenerateOutWalls();
+	GeneratePerlinNoiseDungeon();
+	GenerateCenter(); 
 }
 
 // Called every frame
@@ -184,6 +187,98 @@ void ACastleGenerator::GenerateOutWalls()
 			UE_LOG(LogTemp, Warning, TEXT("OutCorners is empty"));
 		}
 	}
+}
+
+void ACastleGenerator::GenerateCenter()
+{
+	int i = 0;
+	for (FLine Line : DungeonColumns)
+	{
+		int j = 0;
+		for (int Height : Line.Height)
+		{
+			for (int h = 0; h < Height; h++)
+			{
+				float X = i * (2 * CellSize) - CellSize * (DungeonColumns.Num() - 1);
+				float Y = j * (2 * CellSize) - CellSize * (Line.Height.Num() - 1);
+				float Z = (2 * CellSize) * h;
+				float rot = FMath::RandRange(0, 4) * 90;
+				if (h == 0) // Base
+				{
+					int32 RandomIndex = FMath::RandRange(0, DungeonsFloors.Num() - 1);
+					UStaticMesh* RandomMesh = DungeonsFloors[RandomIndex];
+					SpawnMesh(RandomMesh, X, Y, Z, rot);
+				}
+				else if (h < Height - 1) // Not a Roof
+				{
+					int32 RandomIndex = FMath::RandRange(0, DungeonsWalls.Num() - 1);
+					UStaticMesh* RandomMesh = DungeonsWalls[RandomIndex];
+					SpawnMesh(RandomMesh, X, Y, Z, rot);
+				}
+				else // Roof
+				{
+					int32 RandomIndex = FMath::RandRange(0, DungeonsRoofs.Num() - 1);
+					UStaticMesh* RandomMesh = DungeonsRoofs[RandomIndex];
+					SpawnMesh(RandomMesh, X, Y, Z, rot);
+				}
+			}
+			j++;
+		}
+		i++;
+	}
+}
+
+void ACastleGenerator::GeneratePerlinNoiseDungeon()
+{
+	int InDepth = OutDepth / 2;
+	int InWidth = OutWidth / 2;
+
+	for (int32 Y = 0; Y < InDepth; ++Y)
+	{
+		FLine NewLine = FLine();
+		DungeonColumns.Add(NewLine);
+
+		for (int32 X = 0; X < InWidth; ++X)
+		{
+			float NoiseValue = FMath::PerlinNoise2D(FVector2D(X, Y) * Scale);
+			int32 MappedValue = FMath::Clamp(FMath::RoundToInt((NoiseValue + 1.0f) * 127.5f), 0, 255);
+			
+			int HeightValue;
+
+			if (MappedValue < 20)
+			{
+				HeightValue = 1;
+			}
+			else if (MappedValue < 50)
+			{
+				HeightValue = 2;
+			}
+			else if (MappedValue < 100)
+			{
+				HeightValue = 3;
+			}
+			else if (MappedValue < 150)
+			{
+				HeightValue = 4;
+			}
+			else if (MappedValue < 200)
+			{
+				HeightValue = 5;
+			}
+			else
+			{
+				HeightValue = 6;
+			}
+
+			DungeonColumns[Y].Height.Add(HeightValue);
+		}
+	}
+}
+
+void ACastleGenerator::GenerateSize()
+{
+	OutDepth = FMath::RandRange(10, 20);
+	OutWidth = FMath::RandRange(10, 20);
 }
 
 void ACastleGenerator::SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, float rotZ)

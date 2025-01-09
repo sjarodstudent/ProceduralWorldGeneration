@@ -12,7 +12,7 @@ struct FLine
 	GENERATED_BODY()
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Height;
+	TArray<int> Height;
 };
 
 UCLASS()
@@ -24,6 +24,10 @@ public:
 	
 
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generator")
+	float Scale = 1;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Generator")
 	int OutDepth = 5;
 
@@ -46,6 +50,9 @@ public:
 	TArray<UStaticMesh*> DungeonsRoofs;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generator")
+	TArray<UStaticMesh*> DungeonsFloors;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Generator")
 	TArray<FLine> DungeonColumns;
 
 public:	
@@ -53,6 +60,9 @@ public:
 	ACastleGenerator();
 
 	void GenerateOutWalls();
+	void GenerateCenter();
+	void GeneratePerlinNoiseDungeon();
+	void GenerateSize();
 	void SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, float rotZ);
 
 protected:
