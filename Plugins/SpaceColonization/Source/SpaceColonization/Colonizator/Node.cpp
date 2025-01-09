@@ -11,8 +11,10 @@ USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& def
 	FVector dir = FVector::Zero();
 	for (int i = 0; i < CurrentNearbyAttractors.Num(); ++i)
 	{
+		// random weight to prevent being exactly in the middle of two attractors
+		float weight = FMath::FRandRange(0.95f, 1.f);
 		// add direction to the attractor
-		dir += CurrentNearbyAttractors[i]->GetActorLocation() - transform.GetLocation();
+		dir += (CurrentNearbyAttractors[i]->GetActorLocation() - transform.GetLocation()) * weight;
 	}
 
 	// if no nearby attractors, grow based on the parent direction
@@ -50,6 +52,6 @@ void USpaceColonizationNode::ThickenParent()
 	if (scale.Length() >= MaxThickness)
 		return;
 
-	parent->transform.SetScale3D(scale * 1.002f);
+	parent->transform.SetScale3D(scale * ThicknessGrowth);
 	parent->ThickenParent();
 }

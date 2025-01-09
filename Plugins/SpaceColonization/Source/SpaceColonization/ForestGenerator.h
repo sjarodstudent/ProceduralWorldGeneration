@@ -28,9 +28,6 @@ private:
 	TSubclassOf<AProceduralTree> TreeType;
 
 	UPROPERTY(EditAnywhere, Category = "Forest Generator")
-	TSubclassOf<AActor> ActorLeafType;
-
-	UPROPERTY(EditAnywhere, Category = "Forest Generator")
 	float MaxGroundHeight = 5000.f;
 
 	UPROPERTY(EditAnywhere, Category = "Forest Generator")
@@ -38,18 +35,12 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Forest Generator")
 	float CloudOffset = 75.f;
-
-	UPROPERTY(EditAnywhere, Category = "Forest Generator")
-	bool bGrowTemporally;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Forest Generator")
 	float AttractorRadius = 450.f;
 
 	UPROPERTY(EditAnywhere, Category = "Forest Generator")
 	int AttractorCount = 50;
-
-	UPROPERTY(EditAnywhere, Category = "Forest Generator")
-	float TreeMaxThickness = 2.5f;
 
 public:	
 	// Sets default values for this actor's properties

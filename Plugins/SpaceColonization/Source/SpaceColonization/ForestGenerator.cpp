@@ -67,10 +67,7 @@ void AForestGenerator::BeginPlay()
 		cloud->AttractorCount = AttractorCount;
 		UGameplayStatics::FinishSpawningActor(cloudActor, cloudTransform);
 
-		tree->SetActorLeafType(ActorLeafType);
 		tree->SetLeafCloud(cloud);
-		tree->SetGrowTemporally(bGrowTemporally);
-		tree->SetMaxThickness(TreeMaxThickness);
 		UGameplayStatics::FinishSpawningActor(treeActor, treeTransform);
 	}
 }

@@ -17,9 +17,14 @@ private:
 
 	USpaceColonizationNode* parent = nullptr;
 	TArray<USpaceColonizationNode*> children;
-	
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float SegmentLength = 0.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxThickness = 5.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ThicknessGrowth = 1.1f;
 
 public:
 	TArray<AAttractor*> CurrentNearbyAttractors;
@@ -39,6 +44,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	inline USpaceColonizationNode* GetParent() const { return parent; }
+	UFUNCTION(BlueprintCallable)
+	inline bool HasChildren() const { return children.Num() > 0; }
 	
 	UFUNCTION(BlueprintCallable)
 	inline float GetSegmentLength() const { return SegmentLength; }
@@ -51,9 +58,17 @@ public:
 	inline float GetThickness() const { return transform.GetScale3D().Length(); }
 
 	UFUNCTION(BlueprintCallable)
+	inline float GetThicknessGrowth() const { return ThicknessGrowth; }
+	UFUNCTION(BlueprintCallable)
+	inline void SetThicknessGrowth(const float newThickness) { ThicknessGrowth = newThickness; }
+
+	UFUNCTION(BlueprintCallable)
 	inline FVector GetLocation() const { return transform.GetLocation(); }
 	inline void SetLocation(const FVector& location) { transform.SetLocation(location); }
 	UFUNCTION(BlueprintCallable)
 	inline FQuat GetRotation() const { return transform.GetRotation(); }
 	inline void SetRotation(const FRotator& rotation) { transform.SetRotation(rotation.Quaternion()); }
+	UFUNCTION(BlueprintCallable)
+	inline FVector GetScale() const { return transform.GetScale3D(); }
+	inline void SetScale(const FVector& scale) { transform.SetScale3D(scale); }
 };

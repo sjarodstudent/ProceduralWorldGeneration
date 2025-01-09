@@ -94,7 +94,7 @@ bool ASpaceColonizator::IsAnyBranchInAnyLeafAttractionDistance() const
 {
 	for (const auto& branch : Branches)
 	{
-		if (IsBranchInAnyLeafAttractionDistance(branch))
+		if (!branch->HasChildren() && IsBranchInAnyLeafAttractionDistance(branch))
 			return true;
 	}
 	return false;
@@ -245,6 +245,8 @@ void ASpaceColonizator::GrowBranches()
 #endif
 
 			USpaceColonizationNode* child = branch->GrowChildNode();
+			child->SetSegmentLength(SegmentLength);
+			child->SetMaxThickness(MaxThickness);
 			Branches.Add(child);
 			OnBranchSpawnedDo(child);
 		}

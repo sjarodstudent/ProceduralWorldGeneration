@@ -60,6 +60,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization")
 	float MaxThickness = 5.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization")
+	float ThicknessGrowth = 1.1f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float GrowTimer = 0.1f;
