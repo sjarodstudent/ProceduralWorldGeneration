@@ -4,7 +4,7 @@
 
 #include "Attractor.h"
 
-USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& leavesAverageDirection)
+USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& defaultGrowDirection)
 {
 	// spawn a new node in direction of nearby attractors
 
@@ -17,14 +17,7 @@ USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& lea
 
 	// if no nearby attractors, grow based on the parent direction
 	if (dir == FVector::ZeroVector)
-	{
-		if (leavesAverageDirection == FVector::ZeroVector)
-			// forward vector rotated depending on this node rotation
-			dir = FVector::ForwardVector.RotateAngleAxis(transform.GetRotation().GetAngle(),
-			                                             transform.GetRotation().GetRotationAxis());
-		else
-			dir = leavesAverageDirection;
-	}
+		dir = defaultGrowDirection;
 
 	dir.Normalize();
 	FRotator rot = dir.Rotation();

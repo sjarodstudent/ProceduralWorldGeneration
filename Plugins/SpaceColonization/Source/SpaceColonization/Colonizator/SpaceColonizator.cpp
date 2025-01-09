@@ -54,11 +54,10 @@ void ASpaceColonizator::LinkAttractorCloud()
 
 void ASpaceColonizator::GrowRootBranch()
 {
-	const FVector loc = GetActorLocation();
-	const FRotator rot = GetActorRotation();
-
 	// save root branch
 	RootBranch = NewObject<USpaceColonizationNode>();
+	RootBranch->SetLocation(GetActorLocation());
+	RootBranch->SetRotation(GetActorRotation());
 	RootBranch->SetSegmentLength(SegmentLength);
 	RootBranch->SetMaxThickness(MaxThickness);
 
@@ -76,14 +75,7 @@ void ASpaceColonizator::GrowRootBranch()
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Root branch forward : %f, %f, %f"), fw.X, fw.Y, fw.Z));
 #endif
 
-	if (bSpawnActorsOnBranches)
-	{
-		FActorSpawnParameters spawnParams;
-		spawnParams.bNoFail = true;
-		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		AActor* r = GetWorld()->SpawnActor(ActorBranchType, &loc, &rot, spawnParams);
-		check(r);
-	}
+	OnBranchSpawnedDo(RootBranch);
 }
 
 bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const USpaceColonizationNode* branch) const
@@ -123,30 +115,19 @@ void ASpaceColonizator::GrowTrunk()
 {
 	USpaceColonizationNode* LastBranch = RootBranch;
 
-	FVector leavesAverageLocation = FVector::ZeroVector;
+	FVector trunkDir = GetActorForwardVector();
 	if (!bTrunkFollowArrow)
-		leavesAverageLocation = GetLeavesAverageLocation();
+		trunkDir = GetLeavesAverageLocation();
 
 	while (!IsBranchInAnyLeafAttractionDistance(LastBranch))
 	{
-		USpaceColonizationNode* newBranch = LastBranch->GrowChildNode(leavesAverageLocation);
+		USpaceColonizationNode* newBranch = LastBranch->GrowChildNode(trunkDir);
 		newBranch->SetSegmentLength(SegmentLength);
 		newBranch->SetMaxThickness(MaxThickness);
 
 		Branches.Add(newBranch);
 		LastBranch = newBranch;
-
-		if (bSpawnActorsOnBranches)
-		{
-			FVector loc = newBranch->GetLocation();
-			FRotator rot = newBranch->GetRotation().Rotator();
-
-			FActorSpawnParameters spawnParams;
-			spawnParams.bNoFail = true;
-			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			AActor* r = GetWorld()->SpawnActor(ActorBranchType, &loc, &rot, spawnParams);
-			check(r);
-		}
+		OnBranchSpawnedDo(newBranch);
 	}
 }
 
@@ -212,21 +193,28 @@ void ASpaceColonizator::GrowBranches()
 
 			USpaceColonizationNode* child = branch->GrowChildNode();
 			Branches.Add(child);
-			if (bSpawnActorsOnBranches)
-			{
-				FVector loc = child->GetLocation();
-				FRotator rot = child->GetRotation().Rotator();
-				
-				FActorSpawnParameters spawnParams;
-				spawnParams.bNoFail = true;
-				spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-				AActor* r = GetWorld()->SpawnActor(ActorBranchType, &loc, &rot, spawnParams);
-				check(r);
-			}
+			OnBranchSpawnedDo(child);
 		}
 	}
 }
 
+void ASpaceColonizator::OnBranchSpawnedDo(USpaceColonizationNode* branch)
+{
+	if (bSpawnActorsOnBranches)
+	{
+		FVector loc = branch->GetLocation();
+		FRotator rot = branch->GetRotation().Rotator();
+
+		FActorSpawnParameters spawnParams;
+		spawnParams.bNoFail = true;
+		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		AActor* r = GetWorld()->SpawnActor(ActorBranchType, &loc, &rot, spawnParams);
+		check(r);
+	}
+
+	if (bGenerateEventOnBranchSpawn && OnBranchSpawned.IsBound())
+		OnBranchSpawned.Broadcast(branch);
+}
 
 // Called when the game starts or when spawned
 void ASpaceColonizator::BeginPlay()
@@ -244,7 +232,7 @@ void ASpaceColonizator::BeginPlay()
 
 	// generate next nodes
 
-	if (bGrowTemporally)
+	if (!bGrowTemporally)
 	{
 		while (IsAnyBranchInAnyLeafAttractionDistance())
 		{
@@ -271,4 +259,14 @@ void ASpaceColonizator::Tick(float DeltaSeconds)
 
 		GrowTimerStamp += DeltaSeconds;
 	}
+}
+
+FVector ASpaceColonizator::GetRootLocation() const
+{
+	return RootBranch->GetLocation();
+}
+
+FRotator ASpaceColonizator::GetRootRotation() const
+{
+	return RootBranch->GetRotation().Rotator();
 }

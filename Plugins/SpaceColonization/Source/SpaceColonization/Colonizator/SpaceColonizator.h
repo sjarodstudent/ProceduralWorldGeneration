@@ -12,12 +12,15 @@ class AAttractor;
 class UArrowComponent;
 class AAttractorCloud;
 
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBranchSpawnedDelegate, const USpaceColonizationNode*, Branch);
+
 UCLASS()
 class SPACECOLONIZATION_API ASpaceColonizator : public AActor
 {
 	GENERATED_BODY()
 
-private:
+protected:
 	UPROPERTY(EditAnywhere, Category = "Arrow")
 	UArrowComponent* ArrowComponent;
 
@@ -27,11 +30,16 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	bool bTrunkFollowArrow = false;
 
+	USpaceColonizationNode* RootBranch = nullptr;
+	
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	TArray<AAttractor*> Leaves;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	AAttractorCloud* LeafCloud;
+
+	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
+	TArray<USpaceColonizationNode*> Branches;
 
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	float SegmentLength = 15.f;
@@ -42,21 +50,27 @@ private:
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	TSubclassOf<AActor> ActorBranchType = nullptr;
 
-	USpaceColonizationNode* RootBranch = nullptr;
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	bool bGenerateEventOnBranchSpawn = true;
+
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	float MaxThickness = 1.25f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float GrowTimer = 0.1f;
 	float GrowTimerStamp = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	float MaxThickness = 1.25f;
-
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	bool bGrowTemporally = true;
 
-public:
-	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
-	TArray<USpaceColonizationNode*> Branches;
+	UFUNCTION()
+	void OnBranchSpawnedDo(USpaceColonizationNode* branch);
+
+
+protected:
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Space Colonization")
+	FOnBranchSpawnedDelegate OnBranchSpawned;
+
 
 	// Sets default values for this actor's properties
 	ASpaceColonizator();
@@ -69,6 +83,7 @@ public:
 	bool IsBranchInAnyLeafAttractionDistance(const USpaceColonizationNode* branch) const;
 	bool IsAnyBranchInAnyLeafAttractionDistance() const;
 
+	UFUNCTION(BlueprintCallable, Category = "Space Colonization")
 	FVector GetLeavesAverageLocation() const;
 	void GrowTrunk();
 
@@ -80,4 +95,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
+	FVector GetRootLocation() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
+	FRotator GetRootRotation() const;
 };

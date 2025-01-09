@@ -24,17 +24,28 @@ private:
 public:
 	TArray<AAttractor*> CurrentNearbyAttractors;
 
-	USpaceColonizationNode* GrowChildNode(const FVector& leavesAverageDirection = FVector::ZeroVector);
+	/**
+	 * grow a child branch in the direction of the attracted attractors
+	 * grow in the specified default direction if no attractors are attracted 
+	 * @param defaultGrowDirection 
+	 * @return 
+	 */
+	USpaceColonizationNode* GrowChildNode(const FVector& defaultGrowDirection = FVector::ZeroVector);
 
 public:
 	inline bool HasAttractors() const { return CurrentNearbyAttractors.Num() > 0; }
 
+	UFUNCTION(BlueprintCallable)
 	inline float GetSegmentLength() const { return SegmentLength; }
 	inline void SetSegmentLength(const float& segmentLength) { SegmentLength = segmentLength; }
 
 	inline float GetMaxThickness() const { return MaxThickness; }
 	inline void SetMaxThickness(const float& maxThickness) { MaxThickness = maxThickness; }
 
+	UFUNCTION(BlueprintCallable)
 	inline FVector GetLocation() const { return transform.GetLocation(); }
+	inline void SetLocation(const FVector& location) { transform.SetLocation(location); }
+	UFUNCTION(BlueprintCallable)
 	inline FQuat GetRotation() const { return transform.GetRotation(); }
+	inline void SetRotation(const FRotator& rotation) { transform.SetRotation(rotation.Quaternion()); }
 };

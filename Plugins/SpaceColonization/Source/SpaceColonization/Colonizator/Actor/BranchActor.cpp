@@ -14,7 +14,7 @@ ABranchActor::ABranchActor()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Engine/BasicShapes/Cube"));
 	Mesh->SetStaticMesh(CubeMesh.Object);
 	// mesh default scale value
-	Mesh->SetRelativeScale3D(FVector(1.5f, 0.25f, 0.25f));
+	Mesh->SetRelativeScale3D(FVector(0.25f, 0.25f, 0.25f));
 }
 
 void ABranchActor::SetOptions(const float segmentLength, const float maxThickness)

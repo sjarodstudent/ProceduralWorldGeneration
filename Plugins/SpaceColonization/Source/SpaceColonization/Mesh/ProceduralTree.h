@@ -3,24 +3,42 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
+#include "../Colonizator/SpaceColonizator.h"
 #include "ProceduralTree.generated.h"
 
+class UProceduralMeshComponent;
+class USpaceColonizationNode;
+
 UCLASS()
-class SPACECOLONIZATION_API AProceduralTree : public AActor
+class SPACECOLONIZATION_API AProceduralTree : public ASpaceColonizator
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
+	TArray<FVector> Vertices;
+	UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
+	TArray<int> Triangles;
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
+	UProceduralMeshComponent* ProceduralMesh;
 	
 public:	
 	// Sets default values for this actor's properties
 	AProceduralTree();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable)
+	void VerticesMathAdd(const float f);
+	UFUNCTION(BlueprintCallable)
+	void VerticesMathSub(const float f);
+	UFUNCTION(BlueprintCallable)
+	void VerticesMathMultiply(const float f);
+	UFUNCTION(BlueprintCallable)
+	void VerticesMathDivide(const float f);
+	UFUNCTION(BlueprintCallable)
+	void VerticesRotate(const FQuat q);
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Space Colonization")
+	void GenerateMeshSection(const USpaceColonizationNode* Branch);
 };

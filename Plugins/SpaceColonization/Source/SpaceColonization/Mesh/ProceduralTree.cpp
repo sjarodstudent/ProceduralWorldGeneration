@@ -3,21 +3,58 @@
 
 #include "ProceduralTree.h"
 
+#include "ProceduralMeshComponent.h"
+#include "SpaceColonization/Colonizator/Node.h"
+
 // Sets default values
 AProceduralTree::AProceduralTree()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = bGrowTemporally;
+
+	ProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural Mesh"));
 }
 
-// Called when the game starts or when spawned
-void AProceduralTree::BeginPlay()
+void AProceduralTree::VerticesMathAdd(const float f)
 {
-	Super::BeginPlay();
+	for (FVector& v : Vertices)
+	{
+		v = v + f;
+	}
 }
 
-// Called every frame
-void AProceduralTree::Tick(float DeltaTime)
+void AProceduralTree::VerticesMathSub(const float f)
 {
-	Super::Tick(DeltaTime);
+	for (FVector& v : Vertices)
+	{
+		v = v - f;
+	}
+}
+
+void AProceduralTree::VerticesMathMultiply(const float f)
+{
+	for (FVector& v : Vertices)
+	{
+		v = v * f;
+	}
+}
+
+void AProceduralTree::VerticesMathDivide(const float f)
+{
+	for (FVector& v : Vertices)
+	{
+		v = v / f;
+	}
+}
+
+void AProceduralTree::VerticesRotate(const FQuat q)
+{
+	for (FVector& v : Vertices)
+	{
+		v = v.RotateAngleAxis(q.GetAngle(), q.GetRotationAxis());
+	}
+}
+
+void AProceduralTree::GenerateMeshSection_Implementation(const USpaceColonizationNode* Branch)
+{
 }

@@ -17,13 +17,14 @@ private:
 	// generated attractors
 	TArray<AAttractor*> Attractors;
 
-public:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
 	int AttractorCount = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
 	float AttractorRadius = 1000.f;
 
+public:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	TSubclassOf<AAttractor> AttractorType = nullptr;
 
