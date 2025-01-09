@@ -17,7 +17,7 @@ private:
 	// generated attractors
 	TArray<AAttractor*> Attractors;
 
-protected:
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
 	int AttractorCount = 100;
 

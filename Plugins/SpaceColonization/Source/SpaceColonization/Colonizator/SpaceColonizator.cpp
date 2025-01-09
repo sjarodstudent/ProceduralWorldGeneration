@@ -230,6 +230,11 @@ void ASpaceColonizator::BeginPlay()
 	Super::BeginPlay();
 
 	LinkAttractorCloud();
+	if (Leaves.IsEmpty())
+	{
+		UE_LOG(LogTemp, Error, TEXT("No leaves in this tree"));
+		return;
+	}
 
 	// create root
 	GrowRootBranch();
@@ -276,6 +281,21 @@ void ASpaceColonizator::Tick(float DeltaSeconds)
 
 		GrowTimerStamp += DeltaSeconds;
 	}
+}
+
+void ASpaceColonizator::SetLeafCloud(AAttractorCloud* leafCloud)
+{
+	LeafCloud = leafCloud;
+}
+
+void ASpaceColonizator::SetGrowTemporally(bool growTemporally)
+{
+	this->bGrowTemporally = growTemporally;
+}
+
+void ASpaceColonizator::SetMaxThickness(float maxThickness)
+{
+	MaxThickness = maxThickness;
 }
 
 FVector ASpaceColonizator::GetRootLocation() const

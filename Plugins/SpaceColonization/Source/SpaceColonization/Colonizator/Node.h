@@ -19,7 +19,7 @@ private:
 	TArray<USpaceColonizationNode*> children;
 	
 	float SegmentLength = 0.f;
-	float MaxThickness = 1.25f;
+	float MaxThickness = 5.f;
 
 public:
 	TArray<AAttractor*> CurrentNearbyAttractors;

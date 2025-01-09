@@ -59,7 +59,7 @@ protected:
 	bool bGenerateEventOnBranchSpawn = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization")
-	float MaxThickness = 1.25f;
+	float MaxThickness = 5.f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float GrowTimer = 0.1f;
@@ -104,8 +104,18 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 public:
+	void SetLeafCloud(AAttractorCloud* leafCloud);
+	void SetActorLeafType(TSubclassOf<AActor> leafType);
+	void SetGrowTemporally(bool growTemporally);
+	void SetMaxThickness(float maxThickness);
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	FVector GetRootLocation() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	FRotator GetRootRotation() const;
 };
+
+inline void ASpaceColonizator::SetActorLeafType(TSubclassOf<AActor> leafType)
+{
+	this->ActorLeafType = leafType;
+}
