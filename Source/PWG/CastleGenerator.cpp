@@ -301,24 +301,7 @@ void ACastleGenerator::SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, f
 
 	Rotation = FRotator(0.0f, rotZ, 0.0f);
 
-	if (ApplyNormal)
-	{
-		//Mesh->SetActorRelativeRotation(Rotation);
-
-		FMatrix matrix = FRotationMatrix::MakeFromZ(Hit.Normal);
-		FQuat groundQuat = FQuat(matrix);
-
-		FQuat offsetQuat = FQuat(Rotation);
-
-		FQuat finalQuat = offsetQuat * groundQuat;
-
-		Mesh->SetActorRotation(finalQuat.Rotator());
-		//Mesh->SetActorRotation(matrix.Rotator());
-	}
-	else
-	{
-		Mesh->SetActorRelativeRotation(Rotation);
-	}
+	Mesh->SetActorRelativeRotation(Rotation);
 
 	Mesh->GetStaticMeshComponent()->SetStaticMesh(mesh);
 
