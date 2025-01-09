@@ -35,5 +35,21 @@ USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& def
 
 	CurrentNearbyAttractors.Empty();
 
+	ThickenParent();
+	
 	return child;
+}
+
+void USpaceColonizationNode::ThickenParent()
+{
+	if (!parent)
+		return;
+	
+	FVector scale = parent->transform.GetScale3D();
+
+	if (scale.Length() >= MaxThickness)
+		return;
+
+	parent->transform.SetScale3D(scale * 1.002f);
+	parent->ThickenParent();
 }

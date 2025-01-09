@@ -14,6 +14,8 @@ class AAttractorCloud;
 
 UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBranchSpawnedDelegate, const USpaceColonizationNode*, Branch);
+UDELEGATE()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGrowEndDelegate);
 
 UCLASS()
 class SPACECOLONIZATION_API ASpaceColonizator : public AActor
@@ -41,7 +43,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
 	TArray<USpaceColonizationNode*> Branches;
 
-	UPROPERTY(EditAnywhere, Category="Space Colonization")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Space Colonization")
 	float SegmentLength = 15.f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
@@ -53,7 +55,7 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	bool bGenerateEventOnBranchSpawn = true;
 
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization")
 	float MaxThickness = 1.25f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
@@ -70,6 +72,8 @@ protected:
 protected:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Space Colonization")
 	FOnBranchSpawnedDelegate OnBranchSpawned;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Space Colonization")
+	FOnGrowEndDelegate OnGrowEnd;
 
 
 	// Sets default values for this actor's properties

@@ -239,6 +239,7 @@ void ASpaceColonizator::BeginPlay()
 			ProcessLeaves();
 			GrowBranches();
 		}
+		OnGrowEnd.Broadcast();
 		Leaves.Empty();
 	}
 }
@@ -247,7 +248,8 @@ void ASpaceColonizator::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (bGrowTemporally)
+	bool stop = false;
+	if (!stop && bGrowTemporally)
 	{
 		if (GrowTimerStamp >= GrowTimer)
 		{
@@ -255,6 +257,13 @@ void ASpaceColonizator::Tick(float DeltaSeconds)
 
 			ProcessLeaves();
 			GrowBranches();
+
+			if (!IsAnyBranchInAnyLeafAttractionDistance())
+			{
+				OnGrowEnd.Broadcast();
+				Leaves.Empty();
+				stop = true;
+			}
 		}
 
 		GrowTimerStamp += DeltaSeconds;

@@ -32,11 +32,13 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static TArray<FVector> VerticesSub(const TArray<FVector>& inputVertex, const float f);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static TArray<FVector> VerticesSubVector(const TArray<FVector>& inputVertex, const FVector& v);
+	static TArray<FVector> VerticesSubVector(const TArray<FVector>& inputVertex, const FVector v);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	static TArray<FVector> VectorSubVertices(const TArray<FVector>& inputVertex, const FVector& v);
+	static TArray<FVector> VectorSubVertices(const TArray<FVector>& inputVertex, const FVector v);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static TArray<FVector> VerticesMultiply(const TArray<FVector>& inputVertex, const float f);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VerticesMultiplyVector(const TArray<FVector>& inputVertex, const FVector f);
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	static TArray<FVector> VerticesDivide(const TArray<FVector>& inputVertex, const float f);
 	UFUNCTION(BlueprintCallable, BlueprintPure)

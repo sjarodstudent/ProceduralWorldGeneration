@@ -35,7 +35,7 @@ TArray<FVector> AProceduralTree::VerticesSub(const TArray<FVector>& inputVertex,
 	return newVertices;
 }
 
-TArray<FVector> AProceduralTree::VerticesSubVector(const TArray<FVector>& inputVertex, const FVector& v)
+TArray<FVector> AProceduralTree::VerticesSubVector(const TArray<FVector>& inputVertex, const FVector v)
 {
 	TArray<FVector> newVertices;
 	for (const FVector& vv : inputVertex)
@@ -45,7 +45,7 @@ TArray<FVector> AProceduralTree::VerticesSubVector(const TArray<FVector>& inputV
 	return newVertices;
 }
 
-TArray<FVector> AProceduralTree::VectorSubVertices(const TArray<FVector>& inputVertex, const FVector& v)
+TArray<FVector> AProceduralTree::VectorSubVertices(const TArray<FVector>& inputVertex, const FVector v)
 {
 	TArray<FVector> newVertices;
 	for (const FVector& vv : inputVertex)
@@ -61,6 +61,16 @@ TArray<FVector> AProceduralTree::VerticesMultiply(const TArray<FVector>& inputVe
 	for (const FVector& v : inputVertex)
 	{
 		newVertices.Add(v * f);
+	}
+	return newVertices;
+}
+
+TArray<FVector> AProceduralTree::VerticesMultiplyVector(const TArray<FVector>& inputVertex, const FVector f)
+{
+	TArray<FVector> newVertices;
+	for (const FVector& vv : inputVertex)
+	{
+		newVertices.Add(vv * f);
 	}
 	return newVertices;
 }

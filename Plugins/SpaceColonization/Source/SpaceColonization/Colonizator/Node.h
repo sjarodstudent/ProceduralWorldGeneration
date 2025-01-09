@@ -32,15 +32,23 @@ public:
 	 */
 	USpaceColonizationNode* GrowChildNode(const FVector& defaultGrowDirection = FVector::ZeroVector);
 
+	void ThickenParent();
+
 public:
 	inline bool HasAttractors() const { return CurrentNearbyAttractors.Num() > 0; }
 
+	UFUNCTION(BlueprintCallable)
+	inline USpaceColonizationNode* GetParent() const { return parent; }
+	
 	UFUNCTION(BlueprintCallable)
 	inline float GetSegmentLength() const { return SegmentLength; }
 	inline void SetSegmentLength(const float& segmentLength) { SegmentLength = segmentLength; }
 
 	inline float GetMaxThickness() const { return MaxThickness; }
 	inline void SetMaxThickness(const float& maxThickness) { MaxThickness = maxThickness; }
+
+	UFUNCTION(BlueprintCallable)
+	inline float GetThickness() const { return transform.GetScale3D().Length(); }
 
 	UFUNCTION(BlueprintCallable)
 	inline FVector GetLocation() const { return transform.GetLocation(); }
