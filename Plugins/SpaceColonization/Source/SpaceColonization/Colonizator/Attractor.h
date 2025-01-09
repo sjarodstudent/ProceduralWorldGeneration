@@ -54,4 +54,6 @@ public:
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	inline float GetAttractionDistance() const { return AttractionDistance; }
+	UFUNCTION(BlueprintCallable, Category = "Space Colonization")
+	inline void SetAttractionDistance(const float newDistance) { AttractionDistance = newDistance; }
 };

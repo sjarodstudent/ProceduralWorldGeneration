@@ -90,6 +90,8 @@ protected:
 	bool IsBranchInAnyLeafAttractionDistance(const USpaceColonizationNode* branch) const;
 	bool IsAnyBranchInAnyLeafAttractionDistance() const;
 
+	float GetFurthestLeafFromCloudDistance() const;
+	AAttractor* GetClosestLeafFromBranch(const USpaceColonizationNode* branch) const;
 	UFUNCTION(BlueprintCallable, Category = "Space Colonization")
 	FVector GetLeavesAverageLocation() const;
 	void GrowTrunk();

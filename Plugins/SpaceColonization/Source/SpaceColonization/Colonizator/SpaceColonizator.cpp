@@ -100,6 +100,35 @@ bool ASpaceColonizator::IsAnyBranchInAnyLeafAttractionDistance() const
 	return false;
 }
 
+float ASpaceColonizator::GetFurthestLeafFromCloudDistance() const
+{
+	FVector center = GetLeavesAverageLocation();
+	float maxDistance = TNumericLimits<float>::Min();
+	for (const auto& leaf : Leaves)
+	{
+		float d = FVector::Dist(center, leaf->GetActorLocation());
+		maxDistance = FMath::Max(maxDistance, d);
+	}
+
+	return maxDistance;
+}
+
+AAttractor* ASpaceColonizator::GetClosestLeafFromBranch(const USpaceColonizationNode* branch) const
+{
+	float minDistance = TNumericLimits<float>::Max();
+	AAttractor* closestLeaf = nullptr;
+	for (const auto& leaf : Leaves)
+	{
+		float d = FVector::Dist(branch->GetLocation(), leaf->GetActorLocation());
+		if (d < minDistance)
+		{
+			minDistance = d;
+			closestLeaf = leaf;
+		}
+	}
+	return closestLeaf;
+}
+
 FVector ASpaceColonizator::GetLeavesAverageLocation() const
 {
 	FVector dir = FVector::ZeroVector;
@@ -119,6 +148,11 @@ void ASpaceColonizator::GrowTrunk()
 	if (!bTrunkFollowArrow)
 		trunkDir = GetLeavesAverageLocation();
 
+
+	// compute cloud radius from furthest leaf from center of cloud
+	// because maybe the cloud is hand made, not with the cloud object class
+	float cloudRadius = GetFurthestLeafFromCloudDistance();
+
 	while (!IsBranchInAnyLeafAttractionDistance(LastBranch))
 	{
 		USpaceColonizationNode* newBranch = LastBranch->GrowChildNode(trunkDir);
@@ -128,6 +162,17 @@ void ASpaceColonizator::GrowTrunk()
 		Branches.Add(newBranch);
 		LastBranch = newBranch;
 		OnBranchSpawnedDo(newBranch);
+
+		float d = FVector::Dist(LastBranch->GetLocation(), GetLeavesAverageLocation());
+		if (d <= cloudRadius)
+		{
+			AAttractor* closest = GetClosestLeafFromBranch(LastBranch);
+			float distToClosestLeaf = FVector::Dist(LastBranch->GetLocation(), closest->GetActorLocation());
+			// ensure the closest has the right attraction range to attract the trunk
+			// avoid any infinite loop problems or empty tree
+			closest->SetAttractionDistance(distToClosestLeaf * 2.f);
+			break;
+		}
 	}
 }
 
