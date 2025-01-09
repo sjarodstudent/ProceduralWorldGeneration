@@ -63,7 +63,7 @@ public:
 	void GenerateCenter();
 	void GeneratePerlinNoiseDungeon();
 	void GenerateSize();
-	void SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, float rotZ);
+	void SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, float rotZ, bool ApplyNormal = false);
 
 protected:
 	// Called when the game starts or when spawned

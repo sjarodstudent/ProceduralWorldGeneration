@@ -44,7 +44,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutWalls.Num() - 1);
 			UStaticMesh* RandomMesh = OutWalls[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -64,7 +64,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutWalls.Num() - 1);
 			UStaticMesh* RandomMesh = OutWalls[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -84,7 +84,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutWalls.Num() - 1);
 			UStaticMesh* RandomMesh = OutWalls[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -104,7 +104,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutWalls.Num() - 1);
 			UStaticMesh* RandomMesh = OutWalls[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -123,7 +123,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutCorners.Num() - 1);
 			UStaticMesh* RandomMesh = OutCorners[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -142,7 +142,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutCorners.Num() - 1);
 			UStaticMesh* RandomMesh = OutCorners[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -161,7 +161,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutCorners.Num() - 1);
 			UStaticMesh* RandomMesh = OutCorners[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -180,7 +180,7 @@ void ACastleGenerator::GenerateOutWalls()
 		{
 			int32 RandomIndex = FMath::RandRange(0, OutCorners.Num() - 1);
 			UStaticMesh* RandomMesh = OutCorners[RandomIndex];
-			SpawnMesh(RandomMesh, X, Y, Z, rotZ);
+			SpawnMesh(RandomMesh, X, Y, Z, rotZ, true);
 		}
 		else
 		{
@@ -281,24 +281,49 @@ void ACastleGenerator::GenerateSize()
 	OutWidth = FMath::RandRange(10, 20);
 }
 
-void ACastleGenerator::SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, float rotZ)
+void ACastleGenerator::SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, float rotZ, bool ApplyNormal)
 {
 	FVector Location(0.0f, 0.0f, 0.0f);
 	FRotator Rotation(0.0f, 0.0f, 0.0f);
 	FActorSpawnParameters SpawnInfo;
-	AStaticMeshActor* Mesh = GetWorld()->SpawnActor<AStaticMeshActor>(Location, Rotation, SpawnInfo);
 
+	AStaticMeshActor* Mesh = GetWorld()->SpawnActor<AStaticMeshActor>(Location, Rotation, SpawnInfo);
 	Mesh->GetRootComponent()->Mobility = EComponentMobility::Movable;
 
 	const FAttachmentTransformRules& AttachmentRules = FAttachmentTransformRules(EAttachmentRule::KeepRelative, true);
 	Mesh->GetRootComponent()->AttachToComponent(GetRootComponent(), AttachmentRules);
 
 	Location = FVector(X, Y, Z);
-	Mesh->SetActorRelativeLocation(Location);
+
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation() + FVector(X, Y, Z) + FVector(0, 0, 100000), GetActorLocation() + FVector(X, Y, Z) + FVector(0, 0, -100000), ECollisionChannel::ECC_Visibility);
+	Mesh->SetActorLocation(Hit.ImpactPoint);
 
 	Rotation = FRotator(0.0f, rotZ, 0.0f);
-	Mesh->SetActorRelativeRotation(Rotation);
+
+	if (ApplyNormal)
+	{
+		//Mesh->SetActorRelativeRotation(Rotation);
+
+		FMatrix matrix = FRotationMatrix::MakeFromZ(Hit.Normal);
+		FQuat groundQuat = FQuat(matrix);
+
+		FQuat offsetQuat = FQuat(Rotation);
+
+		FQuat finalQuat = offsetQuat * groundQuat;
+
+		Mesh->SetActorRotation(finalQuat.Rotator());
+		//Mesh->SetActorRotation(matrix.Rotator());
+	}
+	else
+	{
+		Mesh->SetActorRelativeRotation(Rotation);
+	}
 
 	Mesh->GetStaticMeshComponent()->SetStaticMesh(mesh);
+
+	Mesh->SetActorScale3D(FVector(5, 5, 5));
+
+	
 }
 

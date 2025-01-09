@@ -238,16 +238,29 @@ void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
         int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
         CastleLocation = GrassLocations[RandomIndex];
 
-        FHitResult Hit;
+        SphereMesh = NewObject<UStaticMeshComponent>(this);
+
+        AActor* castle = GetWorld()->SpawnActor<AActor>(CastleBP, CastleLocation, FRotator(0, 0, 0));
+
+        /*FHitResult Hit;
         GetWorld()->LineTraceSingleByChannel(Hit, CastleLocation, FVector(CastleLocation.X, CastleLocation.Y, CastleLocation.Z - 50000), ECollisionChannel::ECC_Visibility);
 
-        AActor* castle = GetWorld()->SpawnActor<AActor>(CastleBP, Hit.Location, FRotator(0, 0, 0));
 
         castle->SetActorScale3D(FVector(5, 5, 5));
 
         FMatrix matrix = FRotationMatrix::MakeFromZ(Hit.Normal);
 
-        castle->SetActorRotation(matrix.Rotator());
+        castle->SetActorRotation(matrix.Rotator());*/
+        
+
+        /*if (SphereMesh)
+        {
+            SphereMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere")));
+            SphereMesh->SetWorldLocation(CastleLocation);
+            SphereMesh->SetWorldScale3D(FVector(50, 50, 50));
+            SphereMesh->RegisterComponentWithWorld(GetWorld());
+            SphereMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+        }*/
     }
 }
 
