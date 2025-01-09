@@ -159,6 +159,14 @@ void ASpaceColonizator::ProcessLeaves()
 		if (leaf->IsReached())
 		{
 			AAttractor* toRemove = leaf;
+
+			if (ActorLeafType)
+			{
+				FVector leafLoc = toRemove->GetActorLocation();
+				FRotator leafRot = toRemove->GetActorRotation();
+				GetWorld()->SpawnActor(ActorLeafType, &leafLoc, &leafRot);
+			}
+
 			Leaves.Remove(toRemove);
 			toRemove->Destroy();
 		}

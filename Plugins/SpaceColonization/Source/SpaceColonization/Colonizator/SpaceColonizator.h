@@ -53,6 +53,9 @@ protected:
 	TSubclassOf<AActor> ActorBranchType = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	TSubclassOf<AActor> ActorLeafType = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	bool bGenerateEventOnBranchSpawn = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization")
