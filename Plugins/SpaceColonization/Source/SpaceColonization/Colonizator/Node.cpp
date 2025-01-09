@@ -20,7 +20,7 @@ USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& def
 		dir = defaultGrowDirection;
 
 	dir.Normalize();
-	FRotator rot = dir.Rotation();
+	FRotator rot = dir.Rotation().GetNormalized();
 
 	dir *= SegmentLength;
 
@@ -28,7 +28,7 @@ USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& def
 	USpaceColonizationNode* child = NewObject<USpaceColonizationNode>();
 	children.Add(child);
 	child->transform.SetLocation(transform.GetLocation() + dir);
-	child->transform.SetRotation(rot.Quaternion());
+	child->transform.SetRotation(rot.Quaternion().GetNormalized());
 	child->SegmentLength = SegmentLength;
 	child->MaxThickness = MaxThickness;
 	child->parent = this;

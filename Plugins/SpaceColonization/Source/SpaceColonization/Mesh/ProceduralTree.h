@@ -14,13 +14,12 @@ class SPACECOLONIZATION_API AProceduralTree : public ASpaceColonizator
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<FVector> Vertices;
-	UPROPERTY(EditAnywhere, Category = "Procedural Mesh")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	TArray<int> Triangles;
 
-protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Mesh")
 	UProceduralMeshComponent* ProceduralMesh;
 	
@@ -28,16 +27,20 @@ public:
 	// Sets default values for this actor's properties
 	AProceduralTree();
 
-	UFUNCTION(BlueprintCallable)
-	void VerticesMathAdd(const float f);
-	UFUNCTION(BlueprintCallable)
-	void VerticesMathSub(const float f);
-	UFUNCTION(BlueprintCallable)
-	void VerticesMathMultiply(const float f);
-	UFUNCTION(BlueprintCallable)
-	void VerticesMathDivide(const float f);
-	UFUNCTION(BlueprintCallable)
-	void VerticesRotate(const FQuat q);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VerticesAdd(const TArray<FVector>& inputVertex, const float f);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VerticesSub(const TArray<FVector>& inputVertex, const float f);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VerticesSubVector(const TArray<FVector>& inputVertex, const FVector& v);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VectorSubVertices(const TArray<FVector>& inputVertex, const FVector& v);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VerticesMultiply(const TArray<FVector>& inputVertex, const float f);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VerticesDivide(const TArray<FVector>& inputVertex, const float f);
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static TArray<FVector> VerticesRotate(const TArray<FVector>& inputVertex, const FQuat q);
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "Space Colonization")
 	void GenerateMeshSection(const USpaceColonizationNode* Branch);

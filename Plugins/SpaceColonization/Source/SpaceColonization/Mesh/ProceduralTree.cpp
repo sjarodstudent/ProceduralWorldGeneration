@@ -15,44 +15,74 @@ AProceduralTree::AProceduralTree()
 	ProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural Mesh"));
 }
 
-void AProceduralTree::VerticesMathAdd(const float f)
+TArray<FVector> AProceduralTree::VerticesAdd(const TArray<FVector>& inputVertex, const float f)
 {
-	for (FVector& v : Vertices)
+	TArray<FVector> newVertices;
+	for (const FVector& v : inputVertex)
 	{
-		v = v + f;
+		newVertices.Add(v + f);
 	}
+	return newVertices;
 }
 
-void AProceduralTree::VerticesMathSub(const float f)
+TArray<FVector> AProceduralTree::VerticesSub(const TArray<FVector>& inputVertex, const float f)
 {
-	for (FVector& v : Vertices)
+	TArray<FVector> newVertices;
+	for (const FVector& v : inputVertex)
 	{
-		v = v - f;
+		newVertices.Add(v - f);
 	}
+	return newVertices;
 }
 
-void AProceduralTree::VerticesMathMultiply(const float f)
+TArray<FVector> AProceduralTree::VerticesSubVector(const TArray<FVector>& inputVertex, const FVector& v)
 {
-	for (FVector& v : Vertices)
+	TArray<FVector> newVertices;
+	for (const FVector& vv : inputVertex)
 	{
-		v = v * f;
+		newVertices.Add((vv - v));
 	}
+	return newVertices;
 }
 
-void AProceduralTree::VerticesMathDivide(const float f)
+TArray<FVector> AProceduralTree::VectorSubVertices(const TArray<FVector>& inputVertex, const FVector& v)
 {
-	for (FVector& v : Vertices)
+	TArray<FVector> newVertices;
+	for (const FVector& vv : inputVertex)
 	{
-		v = v / f;
+		newVertices.Add(v - vv);
 	}
+	return newVertices;
 }
 
-void AProceduralTree::VerticesRotate(const FQuat q)
+TArray<FVector> AProceduralTree::VerticesMultiply(const TArray<FVector>& inputVertex, const float f)
 {
-	for (FVector& v : Vertices)
+	TArray<FVector> newVertices;
+	for (const FVector& v : inputVertex)
 	{
-		v = v.RotateAngleAxis(q.GetAngle(), q.GetRotationAxis());
+		newVertices.Add(v * f);
 	}
+	return newVertices;
+}
+
+TArray<FVector> AProceduralTree::VerticesDivide(const TArray<FVector>& inputVertex, const float f)
+{
+	TArray<FVector> newVertices;
+	for (const FVector& v : inputVertex)
+	{
+		newVertices.Add(v / f);
+	}
+	return newVertices;
+}
+
+TArray<FVector> AProceduralTree::VerticesRotate(const TArray<FVector>& inputVertex, const FQuat q)
+{
+	TArray<FVector> newVertices;
+	for (const FVector& v : inputVertex)
+	{
+		newVertices.Add(q.GetNormalized() * v);
+	}
+	return newVertices;
 }
 
 void AProceduralTree::GenerateMeshSection_Implementation(const USpaceColonizationNode* Branch)
