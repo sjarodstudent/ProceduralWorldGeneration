@@ -39,6 +39,7 @@ public class SpaceColonization : ModuleRules
 				"Slate",
 				"SlateCore",
 				// ... add private dependencies that you statically link with here ...	
+				"ProceduralMeshComponent",
 			}
 			);
 		
