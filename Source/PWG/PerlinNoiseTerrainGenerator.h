@@ -2,6 +2,7 @@
 
 #pragma once
 #include "ProceduralMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -37,6 +38,18 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Perlin Noise")
     UMaterial* ParentMaterial = nullptr;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
+    int CastleCount = 1;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
+    float Radius = 50;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
+    float MaxSlope = 0.1;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
+    TSubclassOf<AActor> CastleBP;
+
     UProceduralMeshComponent* ProceduralMesh;
 
     TArray<UProceduralMeshComponent*> ProceduralMeshArray;
@@ -52,9 +65,22 @@ public:
 
     void GenerateNeighboorTerrain();
 
+    void GenerateCastlePoint(int StartX, int StartY);
+
+    int GetRandomValue();
+
+    bool IsAreaFlat(int32 X, int32 Y);
+
+    void GenerateTreePoint();
+
 protected:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaTime) override;
+
+    int SpawnXCastleLimit = Width - 50;
+    int SpawnYCastleLimit = Height - 50;
+
+    UStaticMeshComponent* SphereMesh;
 
     UMaterialInstanceDynamic* MyMaterial;
 
@@ -72,4 +98,6 @@ protected:
     TArray<TArray<FVector2D>> UVArray;
 
     UMaterialInstanceDynamic* MyMaterialPerlinNoise;
+
+    FVector CastleLocation;
 };

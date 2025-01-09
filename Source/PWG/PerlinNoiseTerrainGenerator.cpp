@@ -10,11 +10,23 @@ APerlinNoiseTerrainGenerator::APerlinNoiseTerrainGenerator()
     PrimaryActorTick.bCanEverTick = true;
 }
 
+int APerlinNoiseTerrainGenerator::GetRandomValue()
+{
+    TArray<int> possibleValues = { Width, Height, -Width, -Height, 0 };
+
+    int randomIndex = FMath::RandRange(0, possibleValues.Num() - 1);
+
+    return possibleValues[randomIndex];
+}
+
 void APerlinNoiseTerrainGenerator::BeginPlay()
 {
     Super::BeginPlay();
 
     GenerateNeighboorTerrain();
+
+    for(int i = 0; i < CastleCount; i++)
+        GenerateCastlePoint(GetRandomValue(), GetRandomValue());
 }
 
 void APerlinNoiseTerrainGenerator::Tick(float DeltaTime)
@@ -250,4 +262,116 @@ UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture()
     PerlinTexture->UpdateResource();
 
     return PerlinTexture;
+}
+
+void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
+{
+    TArray<FVector> GrassLocations;
+
+    int randIndex = FMath::RandRange(0, ProceduralMeshArray.Num() - 1);
+    UProceduralMeshComponent* currentTerrain = ProceduralMeshArray[randIndex];
+
+    for (int y = 0; y < Height; ++y)
+    {
+        for (int x = 0; x < Width; ++x)
+        {
+            float noiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
+            float NormalizedHeight = (noiseValue + 1.0f) * 0.5f;
+
+            if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f)
+                GrassLocations.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, HeightMultiplier));
+        }
+    }
+
+    if (GrassLocations.Num() > 0)
+    {
+        int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
+        CastleLocation = GrassLocations[RandomIndex];
+
+        SphereMesh = NewObject<UStaticMeshComponent>(this);
+
+
+        FHitResult Hit;
+        GetWorld()->LineTraceSingleByChannel(Hit, CastleLocation, FVector(CastleLocation.X, CastleLocation.Y, CastleLocation.Z - 50000), ECollisionChannel::ECC_Visibility);
+
+        AActor* castle = GetWorld()->SpawnActor<AActor>(CastleBP, Hit.Location, FRotator(0, 0, 0));
+
+        castle->SetActorScale3D(FVector(5, 5, 5));
+
+        FMatrix matrix = FRotationMatrix::MakeFromZ(Hit.Normal);
+
+        castle->SetActorRotation(matrix.Rotator());
+        
+
+        /*if (SphereMesh)
+        {
+            SphereMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere")));
+            SphereMesh->SetWorldLocation(CastleLocation);
+            SphereMesh->SetWorldScale3D(FVector(50, 50, 50));
+            SphereMesh->RegisterComponentWithWorld(GetWorld());
+            SphereMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+        }*/
+    }
+}
+
+void APerlinNoiseTerrainGenerator::GenerateTreePoint()
+{
+
+}
+
+/*void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
+{
+    TArray<FVector> GrassLocations;
+
+    for (int y = 0; y < Height; ++y)
+    {
+        for (int x = 0; x < Width; ++x)
+        {
+            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
+            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
+
+            if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f && IsAreaFlat(x, y))
+                GrassLocations.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, NormalizedHeight * HeightMultiplier));
+        }
+    }
+
+    if (GrassLocations.Num() > 0)
+    {
+        int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
+        CastleLocation = GrassLocations[RandomIndex];
+
+        SphereMesh = NewObject<UStaticMeshComponent>(this);
+
+        GetWorld()->SpawnActor<AActor>(CastleBP, CastleLocation, FRotator(0,0,0));
+
+        if (SphereMesh)
+        {
+            //UWorld::SpawnActor();
+            SphereMesh->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Assets/BP/Sphere.Sphere")));
+            SphereMesh->SetWorldLocation(CastleLocation);
+            SphereMesh->SetWorldScale3D(FVector(50, 50, 50));
+            SphereMesh->RegisterComponentWithWorld(GetWorld());
+            SphereMesh->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+        }
+    }
+}*/
+
+bool APerlinNoiseTerrainGenerator::IsAreaFlat(int32 X, int32 Y)
+{
+    float CenterHeight = FMath::PerlinNoise2D(FVector2D((X + Seed) / CellSize, (Y + Seed) / CellSize)) * HeightMultiplier;
+
+    for (int32 dy = -Radius; dy <= Radius; ++dy)
+    {
+        for (int32 dx = -Radius; dx <= Radius; ++dx)
+        {
+            if (dx == 0 && dy == 0)
+                continue;
+
+            float NeighborHeight = FMath::PerlinNoise2D(FVector2D((X + dx + Seed) / CellSize, (Y + dy + Seed) / CellSize)) * HeightMultiplier;
+            if (FMath::Abs(NeighborHeight - CenterHeight) > MaxSlope * CellSize)
+                return false;
+        }
+    }
+
+    return true;
 }
