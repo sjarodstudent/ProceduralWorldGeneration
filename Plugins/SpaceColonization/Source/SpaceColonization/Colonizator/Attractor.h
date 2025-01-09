@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Attractor.generated.h"
 
-class SpaceColonizationNode;
+class USpaceColonizationNode;
 class UStaticMeshComponent;
 
 UCLASS()
@@ -30,7 +30,7 @@ private:
 #endif
 
 public:
-	SpaceColonizationNode* CurrentAttractedNode = nullptr;
+	USpaceColonizationNode* CurrentAttractedNode = nullptr;
 
 	// Sets default values for this actor's properties
 	AAttractor();
@@ -43,6 +43,8 @@ public:
 	bool IsInAttractionRange() const;
 	UFUNCTION(BlueprintCallable, Category = "Space Colonization")
 	bool IsReached() const;
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
+	float GetDistanceToBranch(const USpaceColonizationNode* branch) const;
 
 	UFUNCTION(BlueprintCallable, Category = "Space Colonization")
 	void DrawDebug();

@@ -40,14 +40,6 @@ ASpaceColonizator::ASpaceColonizator()
 		Branches.Empty();
 }
 
-ASpaceColonizator::~ASpaceColonizator()
-{
-	for (SpaceColonizationNode* branch : Branches)
-	{
-		delete Branches;
-	}
-}
-
 void ASpaceColonizator::LinkAttractorCloud()
 {
 	if (!LeafCloud)
@@ -66,7 +58,7 @@ void ASpaceColonizator::GrowRootBranch()
 	const FRotator rot = GetActorRotation();
 
 	// save root branch
-	RootBranch = new SpaceColonizationNode();
+	RootBranch = NewObject<USpaceColonizationNode>();
 	RootBranch->SetSegmentLength(SegmentLength);
 	RootBranch->SetMaxThickness(MaxThickness);
 
@@ -84,18 +76,21 @@ void ASpaceColonizator::GrowRootBranch()
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Root branch forward : %f, %f, %f"), fw.X, fw.Y, fw.Z));
 #endif
 
-	FActorSpawnParameters spawnParams;
-	spawnParams.bNoFail = true;
-	spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	AActor* r = GetWorld()->SpawnActor(BranchType, &loc, &rot, spawnParams);
-	check(r);
+	if (bSpawnActorsOnBranches)
+	{
+		FActorSpawnParameters spawnParams;
+		spawnParams.bNoFail = true;
+		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		AActor* r = GetWorld()->SpawnActor(ActorBranchType, &loc, &rot, spawnParams);
+		check(r);
+	}
 }
 
-bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const SpaceColonizationNode* branch) const
+bool ASpaceColonizator::IsBranchInAnyLeafAttractionDistance(const USpaceColonizationNode* branch) const
 {
 	for (const auto& leaf : Leaves)
 	{
-		float d = leaf->GetDistanceTo(branch);
+		float d = leaf->GetDistanceToBranch(branch);
 		if (d <= leaf->GetAttractionDistance())
 			return true;
 	}
@@ -126,7 +121,7 @@ FVector ASpaceColonizator::GetLeavesAverageLocation() const
 
 void ASpaceColonizator::GrowTrunk()
 {
-	SpaceColonizationNode* LastBranch = RootBranch;
+	USpaceColonizationNode* LastBranch = RootBranch;
 
 	FVector leavesAverageLocation = FVector::ZeroVector;
 	if (!bTrunkFollowArrow)
@@ -134,11 +129,24 @@ void ASpaceColonizator::GrowTrunk()
 
 	while (!IsBranchInAnyLeafAttractionDistance(LastBranch))
 	{
-		SpaceColonizationNode* newBranch = LastBranch->GrowChildNode(leavesAverageLocation);
-		newBranch->SetOptions(SegmentLength, MaxThickness);
+		USpaceColonizationNode* newBranch = LastBranch->GrowChildNode(leavesAverageLocation);
+		newBranch->SetSegmentLength(SegmentLength);
+		newBranch->SetMaxThickness(MaxThickness);
 
 		Branches.Add(newBranch);
 		LastBranch = newBranch;
+
+		if (bSpawnActorsOnBranches)
+		{
+			FVector loc = newBranch->GetLocation();
+			FRotator rot = newBranch->GetRotation().Rotator();
+
+			FActorSpawnParameters spawnParams;
+			spawnParams.bNoFail = true;
+			spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			AActor* r = GetWorld()->SpawnActor(ActorBranchType, &loc, &rot, spawnParams);
+			check(r);
+		}
 	}
 }
 
@@ -155,9 +163,9 @@ void ASpaceColonizator::ProcessLeaves()
 
 		for (int j = 0; j < Branches.Num(); ++j)
 		{
-			SpaceColonizationNode* branch = Branches[j];
+			USpaceColonizationNode* branch = Branches[j];
 
-			float d = FVector::Dist(branch->GetActorLocation(), leaf->GetActorLocation());
+			float d = FVector::Dist(branch->GetLocation(), leaf->GetActorLocation());
 			if (d < minDistance)
 			{
 				minDistance = d;
@@ -188,7 +196,7 @@ void ASpaceColonizator::GrowBranches()
 	int constSize = Branches.Num();
 	for (int i = 0; i < constSize; ++i)
 	{
-		SpaceColonizationNode* branch = Branches[i];
+		USpaceColonizationNode* branch = Branches[i];
 
 		if (branch->HasAttractors())
 		{
@@ -202,8 +210,19 @@ void ASpaceColonizator::GrowBranches()
 			}
 #endif
 
-			SpaceColonizationNode* child = branch->GrowChildNode();
+			USpaceColonizationNode* child = branch->GrowChildNode();
 			Branches.Add(child);
+			if (bSpawnActorsOnBranches)
+			{
+				FVector loc = child->GetLocation();
+				FRotator rot = child->GetRotation().Rotator();
+				
+				FActorSpawnParameters spawnParams;
+				spawnParams.bNoFail = true;
+				spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+				AActor* r = GetWorld()->SpawnActor(ActorBranchType, &loc, &rot, spawnParams);
+				check(r);
+			}
 		}
 	}
 }

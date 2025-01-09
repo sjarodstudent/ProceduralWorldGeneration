@@ -4,15 +4,7 @@
 
 #include "Attractor.h"
 
-SpaceColonizationNode::~SpaceColonizationNode()
-{
-	for (SpaceColonizationNode* child : children)
-	{
-		delete child;
-	}
-}
-
-SpaceColonizationNode* SpaceColonizationNode::GrowChildNode(const FVector& leavesAverageDirection)
+USpaceColonizationNode* USpaceColonizationNode::GrowChildNode(const FVector& leavesAverageDirection)
 {
 	// spawn a new node in direction of nearby attractors
 
@@ -40,7 +32,7 @@ SpaceColonizationNode* SpaceColonizationNode::GrowChildNode(const FVector& leave
 	dir *= SegmentLength;
 
 	// spawn the next node based on the computed direction
-	SpaceColonizationNode* child = new SpaceColonizationNode();
+	USpaceColonizationNode* child = NewObject<USpaceColonizationNode>();
 	children.Add(child);
 	child->transform.SetLocation(transform.GetLocation() + dir);
 	child->transform.SetRotation(rot.Quaternion());

@@ -33,7 +33,7 @@ float AAttractor::GetDistanceToCurrentAttractedNode() const
 	if (!CurrentAttractedNode)
 		return -1.f;
 
-	return GetDistanceTo(CurrentAttractedNode);
+	return GetDistanceToBranch(CurrentAttractedNode);
 }
 
 bool AAttractor::IsInAttractionRange() const
@@ -49,6 +49,14 @@ bool AAttractor::IsReached() const
 		return false;
 
 	return GetDistanceToCurrentAttractedNode() <= KillDistance;
+}
+
+float AAttractor::GetDistanceToBranch(const USpaceColonizationNode* branch) const
+{
+	FVector branchLoc = branch->GetLocation();
+	FVector selfLoc = GetActorLocation();
+	FVector dir = branchLoc - selfLoc;
+	return dir.Length();
 }
 
 void AAttractor::DrawDebug()

@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "SpaceColonizator.generated.h"
 
-class SpaceColonizationNode;
+class USpaceColonizationNode;
 
 class AAttractor;
 class UArrowComponent;
@@ -36,10 +36,13 @@ private:
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
 	float SegmentLength = 15.f;
 
+	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	bool bSpawnActorsOnBranches = false;
+	
 	UPROPERTY(EditAnywhere, Category="Space Colonization")
-	TSubclassOf<AActor> BranchType = nullptr;
+	TSubclassOf<AActor> ActorBranchType = nullptr;
 
-	SpaceColonizationNode* RootBranch = nullptr;
+	USpaceColonizationNode* RootBranch = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float GrowTimer = 0.1f;
@@ -53,18 +56,17 @@ private:
 
 public:
 	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
-	TArray<SpaceColonizationNode*> Branches;
+	TArray<USpaceColonizationNode*> Branches;
 
 	// Sets default values for this actor's properties
 	ASpaceColonizator();
-	~ASpaceColonizator();
 
 	void LinkAttractorCloud();
 
 	void GrowRootBranch();
 
 	// tells if a specified branch is in a leaf's attraction distance
-	bool IsBranchInAnyLeafAttractionDistance(const SpaceColonizationNode* branch) const;
+	bool IsBranchInAnyLeafAttractionDistance(const USpaceColonizationNode* branch) const;
 	bool IsAnyBranchInAnyLeafAttractionDistance() const;
 
 	FVector GetLeavesAverageLocation() const;
