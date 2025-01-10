@@ -15,8 +15,8 @@ class SPACECOLONIZATION_API AForestGenerator : public AActor
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Forest Generator")
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Forest Generator")
 	float Radius = 5000.f;
 	UPROPERTY(EditAnywhere, Category = "Forest Generator")
 	int TreeCount = 5;

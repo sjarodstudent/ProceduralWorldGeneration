@@ -14,11 +14,11 @@ class SPACECOLONIZATION_API AAttractor : public AActor
 {
 	GENERATED_BODY()
 
-private:
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
 	float AttractionDistance = 1000.f;
 
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Space Colonization")
 	float KillDistance = 100.f;
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
