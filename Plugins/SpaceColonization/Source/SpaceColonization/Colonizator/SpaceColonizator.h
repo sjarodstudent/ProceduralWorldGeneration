@@ -14,6 +14,7 @@ class AAttractorCloud;
 
 UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnBranchSpawnedDelegate, const USpaceColonizationNode*, Branch);
+
 UDELEGATE()
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGrowEndDelegate);
 
@@ -29,39 +30,51 @@ protected:
 	/**
 	 * whether the trunk should follow the arrow component or and average location of all the leaves
 	 */
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, Category = "Arrow")
 	bool bTrunkFollowArrow = false;
 
 	USpaceColonizationNode* RootBranch = nullptr;
-	
-	UPROPERTY(EditAnywhere, Category="Space Colonization")
+
+	UPROPERTY(EditAnywhere, Category="Space Colonization Leaves")
 	TArray<AAttractor*> Leaves;
 
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, Category = "Space Colonization Leaves")
 	AAttractorCloud* LeafCloud;
 
-	UPROPERTY(BlueprintReadOnly, Category="Space Colonization")
-	TArray<USpaceColonizationNode*> Branches;
+	UPROPERTY(EditAnywhere, Category = "Space Colonization Leaves")
+	bool bSpawnActorOnLeaves = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Space Colonization")
-	float SegmentLength = 15.f;
-
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	bool bSpawnActorsOnBranches = false;
-	
-	UPROPERTY(EditAnywhere, Category="Space Colonization")
-	TSubclassOf<AActor> ActorBranchType = nullptr;
-
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, Category = "Space Colonization Leaves")
 	TSubclassOf<AActor> ActorLeafType = nullptr;
 
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, Category = "Space Colonization Leaves")
+	bool bSpawnStaticMeshOnLeaves = false;
+
+	UPROPERTY(EditAnywhere, Category = "Space Colonization Leaves")
+	class UStaticMesh* LeafStaticMesh;
+
+	UPROPERTY(BlueprintReadOnly, Category="Space Colonization Branches")
+	TArray<USpaceColonizationNode*> Branches;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Space Colonization Branches")
+	float SegmentLength = 15.f;
+
+	UPROPERTY(EditAnywhere, Category = "Space Colonization Branches")
+	bool bSpawnActorOnBranches = false;
+
+	UPROPERTY(EditAnywhere, Category="Space Colonization Branches")
+	TSubclassOf<AActor> ActorBranchType = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Space Colonization Branches")
 	bool bGenerateEventOnBranchSpawn = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization Branches")
 	float MaxThickness = 5.f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Space Colonization Branches")
 	float ThicknessGrowth = 1.1f;
+
+	UFUNCTION(Category = "Space Colonization Branches")
+	void OnBranchSpawnedDo(USpaceColonizationNode* branch);
 
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	float GrowTimer = 0.1f;
@@ -70,17 +83,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Space Colonization")
 	bool bGrowTemporally = true;
 
-	UPROPERTY(EditAnywhere, Category = "Space Colonization")
-	class UStaticMesh* LeafStaticMesh;
-
-	UFUNCTION()
-	void OnBranchSpawnedDo(USpaceColonizationNode* branch);
-
-
 protected:
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Space Colonization")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Space Colonization Branches")
 	FOnBranchSpawnedDelegate OnBranchSpawned;
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Space Colonization")
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category="Space Colonization Branches")
 	FOnGrowEndDelegate OnGrowEnd;
 
 
@@ -115,7 +121,7 @@ public:
 	void SetActorLeafType(TSubclassOf<AActor> leafType);
 	void SetGrowTemporally(bool growTemporally);
 	void SetMaxThickness(float maxThickness);
-	
+
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	FVector GetRootLocation() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")

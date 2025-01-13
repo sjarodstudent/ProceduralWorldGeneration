@@ -206,18 +206,23 @@ void ASpaceColonizator::ProcessLeaves()
 		{
 			AAttractor* toRemove = leaf;
 
-			if (ActorLeafType)
+			FVector leafLoc = toRemove->GetActorLocation();
+			FRotator leafRot = toRemove->GetActorRotation();
+			
+			if (bSpawnActorOnLeaves && ActorLeafType)
 			{
-				FVector leafLoc = toRemove->GetActorLocation();
-				FRotator leafRot = toRemove->GetActorRotation();
-#if 0 // TODO : create static mesh instead of spawning a "leaf actor"
-				UStaticMeshComponent* leafMesh = NewObject<UStaticMeshComponent>(UStaticMeshComponent::StaticClass(), TEXT("Static Mesh"));
-				leafMesh->RegisterComponent();
-				leafMesh->SetStaticMesh(LeafStaticMesh);
-				leafMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
-#else
 				GetWorld()->SpawnActor(ActorLeafType, &leafLoc, &leafRot);
-#endif
+			}
+			if (bSpawnStaticMeshOnLeaves && LeafStaticMesh)
+			{
+				FTransform leafTransform;
+				leafTransform.SetLocation(leafLoc);
+				leafTransform.SetRotation(leafRot.Quaternion());
+				UStaticMeshComponent* leafMesh = Cast<UStaticMeshComponent>(
+					AddComponentByClass(UStaticMeshComponent::StaticClass(), true, leafTransform, true));
+				leafMesh->SetStaticMesh(LeafStaticMesh);
+				leafMesh->RegisterComponent();
+				FinishAddComponent(leafMesh, true, leafTransform);
 			}
 
 			Leaves.Remove(toRemove);
@@ -263,7 +268,7 @@ void ASpaceColonizator::GrowBranches()
 
 void ASpaceColonizator::OnBranchSpawnedDo(USpaceColonizationNode* branch)
 {
-	if (bSpawnActorsOnBranches)
+	if (bSpawnActorOnBranches)
 	{
 		FVector loc = branch->GetLocation();
 		FRotator rot = branch->GetRotation().Rotator();
