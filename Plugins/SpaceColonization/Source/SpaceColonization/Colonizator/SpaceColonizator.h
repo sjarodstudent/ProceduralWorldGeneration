@@ -122,6 +122,9 @@ public:
 	void SetGrowTemporally(bool growTemporally);
 	void SetMaxThickness(float maxThickness);
 
+	UFUNCTION(BlueprintCallable, Category = "Space Colonization")
+	void AddLeaf(AAttractor* leaf) { Leaves.Add(leaf); }
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")
 	FVector GetRootLocation() const;
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Space Colonization")

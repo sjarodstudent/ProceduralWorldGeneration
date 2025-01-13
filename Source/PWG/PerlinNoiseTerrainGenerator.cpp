@@ -3,10 +3,12 @@
 #include "PerlinNoiseTerrainGenerator.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "SpaceColonization/Colonizator/SpaceColonizator.h"
+#include "SpaceColonization/Colonizator/Attractor.h"
+#include "SpaceColonization/ForestGenerator.h"
 
 APerlinNoiseTerrainGenerator::APerlinNoiseTerrainGenerator()
 {
-
 }
 
 int APerlinNoiseTerrainGenerator::GetRandomValue()
@@ -24,11 +26,22 @@ void APerlinNoiseTerrainGenerator::BeginPlay()
 
     GenerateNeighboorTerrain();
 
+    if (bSpawnRoad)
+    {
+        FTransform SpawnTransform;
+        SpawnTransform.SetLocation(GetActorLocation());
+        SpawnTransform.SetRotation(GetActorRotation().Quaternion());
+        RoadColonizatorHandle = GetWorld()->SpawnActorDeferred<ASpaceColonizator>(RoadBP, SpawnTransform);
+    }
+    
     for(int i = 0; i < CastleCount; i++)
         GenerateCastlePoint(GetRandomValue(), GetRandomValue());
+    
+    for (int i = 0; i < ForestCount; i++)
+        GenerateForestPoints(GetRandomValue(), GetRandomValue());
 
-    for (int i = 0; i < TreeCount; i++)
-        GenerateTreePoints(GetRandomValue(), GetRandomValue());
+    if (bSpawnRoad)
+        RoadColonizatorHandle->FinishSpawning(RoadColonizatorHandle->GetTransform());
 }
 
 void APerlinNoiseTerrainGenerator::GenerateTerrain(int StartX, int StartY)
@@ -209,12 +222,22 @@ void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
         int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
         CastleLocations.Add(GrassLocations[RandomIndex]);
         GetWorld()->SpawnActor<AActor>(CastleBP, GrassLocations[RandomIndex], FRotator(0, 0, 0));
+
+        if (bSpawnRoad)
+        {
+            FVector SpawnLocation = GrassLocations[RandomIndex];
+            FRotator SpawnRotation = FRotator(0, 0, 0);
+            AAttractor* roadAttractor = Cast<AAttractor>(GetWorld()->SpawnActor(RoadAttractorBP, &SpawnLocation, &SpawnRotation));
+            roadAttractor->SetAttractionDistance(10000);
+
+            RoadColonizatorHandle->AddLeaf(roadAttractor);
+        }
     }
 }
 
-void APerlinNoiseTerrainGenerator::GenerateTreePoints(int StartX, int StartY)
+void APerlinNoiseTerrainGenerator::GenerateForestPoints(int StartX, int StartY)
 {
-    TArray<FVector> Trees;
+    TArray<FVector> Forests;
 
     for (int y = 0; y < Height; ++y)
     {
@@ -224,21 +247,25 @@ void APerlinNoiseTerrainGenerator::GenerateTreePoints(int StartX, int StartY)
             float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
 
             if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f)
-                Trees.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, HeightMultiplier));
+                Forests.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, HeightMultiplier));
         }
     }
 
-    if (Trees.Num() > 0)
+    if (Forests.Num() > 0)
     {
         for (int i = 0; i < 100; i++)
         {
-            int RandomIndex = FMath::RandRange(0, Trees.Num() - 1);
+            int RandomIndex = FMath::RandRange(0, Forests.Num() - 1);
 
-            if (IsPointValidForTree(Trees[RandomIndex], Radius))
+            if (IsPointValidForForest(Forests[RandomIndex], Radius))
             {
-                TreePoints.Add(Trees[RandomIndex]);
+                ForestPoints.Add(Forests[RandomIndex]);
 
-                DrawDebugSphere(GetWorld(), Trees[RandomIndex], 5000.f, 10, FColor::Red, true);
+                FVector SpawnLocation = Forests[RandomIndex];
+                FRotator SpawnRotation = FRotator(0, 0, 0);
+                GetWorld()->SpawnActor(ForestBP, &SpawnLocation, &SpawnRotation);
+
+                DrawDebugSphere(GetWorld(), Forests[RandomIndex], 5000.f, 10, FColor::Red, true);
 
                 break;
             }
@@ -246,7 +273,7 @@ void APerlinNoiseTerrainGenerator::GenerateTreePoints(int StartX, int StartY)
     }
 }
 
-bool APerlinNoiseTerrainGenerator::IsPointValidForTree(const FVector& Point, float MinDistance)
+bool APerlinNoiseTerrainGenerator::IsPointValidForForest(const FVector& Point, float MinDistance)
 {
     for (const FVector& CastleLocation : CastleLocations)
     {
@@ -256,9 +283,9 @@ bool APerlinNoiseTerrainGenerator::IsPointValidForTree(const FVector& Point, flo
             return false;
     }
 
-    for (const FVector& TreePoint : TreePoints)
+    for (const FVector& ForestPoint : ForestPoints)
     {
-        if (FVector::Dist(Point, TreePoint) < MinDistance)
+        if (FVector::Dist(Point, ForestPoint) < MinDistance)
             return false;
     }
 

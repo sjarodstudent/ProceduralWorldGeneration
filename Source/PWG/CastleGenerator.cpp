@@ -296,7 +296,11 @@ void ACastleGenerator::SpawnMesh(UStaticMesh* mesh, float X, float Y, float Z, f
 	Location = FVector(X, Y, Z);
 
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation() + FVector(X, Y, Z) + FVector(0, 0, 100000), GetActorLocation() + FVector(X, Y, Z) + FVector(0, 0, -100000), ECollisionChannel::ECC_Visibility);
+	if (!GetWorld()->LineTraceSingleByChannel(Hit, GetActorLocation() + FVector(X, Y, Z) + FVector(0, 0, 100000), GetActorLocation() + FVector(X, Y, Z) + FVector(0, 0, -100000), ECollisionChannel::ECC_Visibility))
+	{
+		Mesh->Destroy();
+		return;
+	}
 	Mesh->SetActorLocation(Hit.ImpactPoint);
 
 	Rotation = FRotator(0.0f, rotZ, 0.0f);

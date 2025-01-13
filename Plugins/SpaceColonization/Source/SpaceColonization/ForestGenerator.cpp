@@ -37,7 +37,7 @@ void AForestGenerator::BeginPlay()
 		randomDir *= randomDistance;
 
 		// start of raycast (in height)
-		FVector start = FVector(randomDir.X, randomDir.Y, MaxGroundHeight);
+		FVector start = GetActorLocation() + FVector(randomDir.X, randomDir.Y, MaxGroundHeight);
 		FVector end = start + FVector::DownVector * MaxGroundHeight * 2.f;
 		FHitResult hit;
 		bool bFound = GetWorld()->LineTraceSingleByChannel(hit, start, end, ECollisionChannel::ECC_WorldStatic);

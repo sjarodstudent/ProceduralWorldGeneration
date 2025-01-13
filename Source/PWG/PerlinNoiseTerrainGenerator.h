@@ -8,8 +8,12 @@
 #include "GameFramework/Actor.h"
 #include "PerlinNoiseTerrainGenerator.generated.h"
 
+class ASpaceColonizator;
+class AAttractor;
 class UProceduralMeshComponent;
 class UMaterialInterface;
+class AForestGenerator;
+
 UCLASS()
 class PWG_API APerlinNoiseTerrainGenerator : public AActor
 {
@@ -39,16 +43,27 @@ public:
     UMaterial* ParentMaterial = nullptr;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
-    int CastleCount = 1;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
-    int TreeCount = 10.f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
     float Radius = 10000.f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements Castle")
+    int CastleCount = 1;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements Castle")
     TSubclassOf<AActor> CastleBP;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements Forest")
+    int ForestCount = 10;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements Forest")
+    TSubclassOf<AForestGenerator> ForestBP;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements Road")
+    bool bSpawnRoad;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements Road")
+    TSubclassOf<AAttractor> RoadAttractorBP;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Terrain Elements Road")
+    TSubclassOf<ASpaceColonizator> RoadBP;
+    ASpaceColonizator* RoadColonizatorHandle;
 
     UProceduralMeshComponent* ProceduralMesh;
 
@@ -66,11 +81,11 @@ public:
 
     int GetRandomValue();
 
-    void GenerateTreePoints(int StartX, int StartY);
+    void GenerateForestPoints(int StartX, int StartY);
 
-    TArray<FVector> TreePoints;
+    TArray<FVector> ForestPoints;
 
-    bool IsPointValidForTree(const FVector& Point, float MinDistance);
+    bool IsPointValidForForest(const FVector& Point, float MinDistance);
 
     void LerpPixelColor(int x, int y, float NormalizedHeight, uint8* Data);
 
