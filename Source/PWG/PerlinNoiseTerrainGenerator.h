@@ -72,11 +72,12 @@ public:
 
     bool IsPointValidForTree(const FVector& Point, float MinDistance);
 
-    void LerpPixelColor(int x, int y, float NormalizedHeight, float WaterHeight, float GrassHeight, uint8* Data);
+    void LerpPixelColor(int x, int y, float NormalizedHeight, uint8* Data);
+
+    void GeneratePoints(int StartX, int StartY, TArray<FVector>* Points);
 
 protected:
     virtual void BeginPlay() override;
-    virtual void Tick(float DeltaTime) override;
 
     int SpawnXCastleLimit = Width - 50;
     int SpawnYCastleLimit = Height - 50;

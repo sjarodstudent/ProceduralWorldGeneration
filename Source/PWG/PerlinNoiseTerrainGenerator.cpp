@@ -6,7 +6,7 @@
 
 APerlinNoiseTerrainGenerator::APerlinNoiseTerrainGenerator()
 {
-    PrimaryActorTick.bCanEverTick = true;
+
 }
 
 int APerlinNoiseTerrainGenerator::GetRandomValue()
@@ -29,13 +29,6 @@ void APerlinNoiseTerrainGenerator::BeginPlay()
 
     for (int i = 0; i < TreeCount; i++)
         GenerateTreePoints(GetRandomValue(), GetRandomValue());
-}
-
-void APerlinNoiseTerrainGenerator::Tick(float DeltaTime)
-{
-    Super::Tick(DeltaTime);
-
-    //UpdateLoadedTerrains();
 }
 
 void APerlinNoiseTerrainGenerator::GenerateTerrain(int StartX, int StartY)
@@ -93,8 +86,6 @@ void APerlinNoiseTerrainGenerator::GenerateTerrain(int StartX, int StartY)
 
         ProceduralMeshArray.Add(proceduralMesh);
     }
-    else
-        UE_LOG(LogTemp, Error, TEXT("Failed to create UProceduralMeshComponent"));
 
     ProceduralMeshArray[TerrainIndex]->CreateMeshSection(0, VerticesArray[VerticesArray.Num() - 1], TrianglesArray[TrianglesArray.Num() - 1], TArray<FVector>(), UVArray[UVArray.Num() - 1], TArray<FColor>(), TArray<FProcMeshTangent>(), true);
 
@@ -144,90 +135,28 @@ UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture(int StartX,
     RawData.Lock(LOCK_READ_WRITE);
     uint8* Data = (uint8*)RawData.Realloc(Width * Height * 4);
 
+    for (int y = 0; y < Height; ++y)
+    {
+        for (int x = 0; x < Width; ++x)
+        {
+            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
+            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
+
+            LerpPixelColor(x, y, NormalizedHeight, Data);
+        }
+    }
+
+    RawData.Unlock();
+    PerlinTexture->UpdateResource();
+
+    return PerlinTexture;
+}
+
+void APerlinNoiseTerrainGenerator::LerpPixelColor(int x, int y, float NormalizedHeight, uint8* Data)
+{
     float WaterHeight = 0.3f;
     float GrassHeight = 0.8f;
 
-    for (int y = 0; y < Height; ++y)
-    {
-        for (int x = 0; x < Width; ++x)
-        {
-            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
-            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
-
-            LerpPixelColor(x, y, NormalizedHeight, WaterHeight, GrassHeight, Data);
-        }
-    }
-
-    RawData.Unlock();
-    PerlinTexture->UpdateResource();
-
-    return PerlinTexture;
-}
-
-UTexture2D* APerlinNoiseTerrainGenerator::GeneratePerlinNoiseTexture()
-{
-    UTexture2D* PerlinTexture = UTexture2D::CreateTransient(Width, Height);
-    if (!PerlinTexture)
-        return nullptr;
-
-    FTexture2DMipMap& Mip = PerlinTexture->GetPlatformData()->Mips[0];
-    Mip.SizeX = Width;
-    Mip.SizeY = Height;
-
-    FByteBulkData& RawData = Mip.BulkData;
-    RawData.Lock(LOCK_READ_WRITE);
-    uint8* Data = (uint8*)RawData.Realloc(Width * Height * 4); // RGBA
-
-    for (int32 y = 0; y < Height; ++y)
-    {
-        for (int32 x = 0; x < Width; ++x)
-        {
-            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + Seed) / CellSize, (y + Seed) / CellSize));
-
-            uint8 ColorValue = FMath::Clamp((NoiseValue + 1.0f) * 127.5f, 0.0f, 255.0f);
-
-            int32 PixelIndex = (y * Width + x) * 4;
-            Data[PixelIndex + 0] = ColorValue;
-            Data[PixelIndex + 1] = ColorValue;
-            Data[PixelIndex + 2] = ColorValue;
-            Data[PixelIndex + 3] = 255;
-        }
-    }
-
-    // Need it for modifying data
-    RawData.Unlock();
-
-    PerlinTexture->UpdateResource();
-
-    return PerlinTexture;
-}
-
-void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
-{
-    TArray<FVector> GrassLocations;
-
-    for (int y = 0; y < Height; ++y)
-    {
-        for (int x = 0; x < Width; ++x)
-        {
-            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
-            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
-
-            if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f)
-                GrassLocations.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, HeightMultiplier));
-        }
-    }
-
-    if (GrassLocations.Num() > 0)
-    {
-        int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
-        CastleLocations.Add(GrassLocations[RandomIndex]);
-        GetWorld()->SpawnActor<AActor>(CastleBP, GrassLocations[RandomIndex], FRotator(0, 0, 0));
-    }
-}
-
-void APerlinNoiseTerrainGenerator::LerpPixelColor(int x, int y, float NormalizedHeight, float WaterHeight, float GrassHeight, uint8* Data)
-{
     int R = 0, G = 0, B = 0;
 
     if (NormalizedHeight < WaterHeight)
@@ -257,6 +186,30 @@ void APerlinNoiseTerrainGenerator::LerpPixelColor(int x, int y, float Normalized
     Data[PixelIndex + 1] = G;
     Data[PixelIndex + 2] = B;
     Data[PixelIndex + 3] = 255;
+}
+
+void APerlinNoiseTerrainGenerator::GenerateCastlePoint(int StartX, int StartY)
+{
+    TArray<FVector> GrassLocations;
+
+    for (int y = 0; y < Height; ++y)
+    {
+        for (int x = 0; x < Width; ++x)
+        {
+            float NoiseValue = FMath::PerlinNoise2D(FVector2D((x + StartX + Seed) / CellSize, (y + StartY + Seed) / CellSize));
+            float NormalizedHeight = (NoiseValue + 1.0f) * 0.5f;
+
+            if (NormalizedHeight >= 0.3f && NormalizedHeight < 0.8f)
+                GrassLocations.Add(FVector((StartX + x) * CellSize, (StartY + y) * CellSize, HeightMultiplier));
+        }
+    }
+
+    if (GrassLocations.Num() > 0)
+    {
+        int RandomIndex = FMath::RandRange(0, GrassLocations.Num() - 1);
+        CastleLocations.Add(GrassLocations[RandomIndex]);
+        GetWorld()->SpawnActor<AActor>(CastleBP, GrassLocations[RandomIndex], FRotator(0, 0, 0));
+    }
 }
 
 void APerlinNoiseTerrainGenerator::GenerateTreePoints(int StartX, int StartY)
