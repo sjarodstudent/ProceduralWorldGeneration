@@ -21,6 +21,7 @@ ASpaceColonizator::ASpaceColonizator()
 
 	// transform may not be needed
 	RootComponent = CreateDefaultSubobject<USceneComponent>("Root");
+	RootComponent->Mobility = EComponentMobility::Static;
 
 
 #if WITH_EDITORONLY_DATA
