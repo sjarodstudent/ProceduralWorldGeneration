@@ -11,7 +11,7 @@ UCLASS(BlueprintType, Blueprintable)
 class SPACECOLONIZATION_API USpaceColonizationNode : public UObject
 {
 	GENERATED_BODY()
-	
+
 private:
 	FTransform transform;
 
@@ -20,11 +20,11 @@ private:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float SegmentLength = 0.f;
+	float SegmentLength = 10.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float MaxThickness = 5.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float ThicknessGrowth = 1.1f;
+	float ThicknessGrowth = 1.f;
 
 public:
 	TArray<AAttractor*> CurrentNearbyAttractors;
@@ -44,31 +44,45 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	inline USpaceColonizationNode* GetParent() const { return parent; }
+
 	UFUNCTION(BlueprintCallable)
 	inline bool HasChildren() const { return children.Num() > 0; }
-	
+
 	UFUNCTION(BlueprintCallable)
 	inline float GetSegmentLength() const { return SegmentLength; }
-	inline void SetSegmentLength(const float& segmentLength) { SegmentLength = segmentLength; }
 
+	UFUNCTION(BlueprintCallable)
 	inline float GetMaxThickness() const { return MaxThickness; }
-	inline void SetMaxThickness(const float& maxThickness) { MaxThickness = maxThickness; }
 
 	UFUNCTION(BlueprintCallable)
 	inline float GetThickness() const { return transform.GetScale3D().Length(); }
 
 	UFUNCTION(BlueprintCallable)
 	inline float GetThicknessGrowth() const { return ThicknessGrowth; }
-	UFUNCTION(BlueprintCallable)
-	inline void SetThicknessGrowth(const float newThickness) { ThicknessGrowth = newThickness; }
 
 	UFUNCTION(BlueprintCallable)
+	inline void SetOptions(const float newSegmentLength, const float newMaxThickness, const float newThicknessGrowth)
+	{
+		SegmentLength = newSegmentLength;
+		MaxThickness = newMaxThickness;
+		ThicknessGrowth = newThicknessGrowth;
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "Branch Transform")
 	inline FVector GetLocation() const { return transform.GetLocation(); }
+
+	UFUNCTION(BlueprintCallable, Category = "Branch Transform")
 	inline void SetLocation(const FVector& location) { transform.SetLocation(location); }
-	UFUNCTION(BlueprintCallable)
+
+	UFUNCTION(BlueprintCallable, Category = "Branch Transform")
 	inline FQuat GetRotation() const { return transform.GetRotation(); }
+
+	UFUNCTION(BlueprintCallable, Category = "Branch Transform")
 	inline void SetRotation(const FRotator& rotation) { transform.SetRotation(rotation.Quaternion()); }
-	UFUNCTION(BlueprintCallable)
+
+	UFUNCTION(BlueprintCallable, Category = "Branch Transform")
 	inline FVector GetScale() const { return transform.GetScale3D(); }
+
+	UFUNCTION(BlueprintCallable, Category = "Branch Transform")
 	inline void SetScale(const FVector& scale) { transform.SetScale3D(scale); }
 };

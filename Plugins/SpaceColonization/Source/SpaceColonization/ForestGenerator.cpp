@@ -25,6 +25,8 @@ void AForestGenerator::BeginPlay()
 {
 	Super::BeginPlay();
 
+	TArray<AActor*> spawnedTrees;
+
 	for (int i = 0; i < TreeCount; ++i)
 	{
 		FVector randomDir = FMath::VRand();
@@ -48,16 +50,18 @@ void AForestGenerator::BeginPlay()
 		treeTransform.SetLocation(treeLocation);
 		treeTransform.SetRotation(treeRotation.Quaternion());
 		AActor* treeActor = GetWorld()->SpawnActorDeferred<AProceduralTree>(TreeType, treeTransform);
+		spawnedTrees.Add(treeActor);
 		AProceduralTree* tree = Cast<AProceduralTree>(treeActor);
 		
 		FVector cloudLocation = treeLocation + FVector::UpVector * FMath::RandRange(0.6f, 1.f) * CloudHeightRange;
 		FVector randCloudOffset = FMath::VRand();
+		randCloudOffset.Z = 0.f;
 		randCloudOffset.Normalize();
 		randCloudOffset *= FMath::FRand() * CloudOffset;
 		FRotator cloudRotation = UKismetMathLibrary::RandomRotator();
 
 		FTransform cloudTransform;
-		cloudTransform.SetLocation(cloudLocation);
+		cloudTransform.SetLocation(cloudLocation + randCloudOffset);
 		cloudTransform.SetRotation(cloudRotation.Quaternion());
 		AActor* cloudActor = GetWorld()->SpawnActorDeferred<AAttractorCloud>(AAttractorCloud::StaticClass(), cloudTransform);
 		AAttractorCloud* cloud = Cast<AAttractorCloud>(cloudActor);
@@ -68,6 +72,10 @@ void AForestGenerator::BeginPlay()
 		UGameplayStatics::FinishSpawningActor(cloudActor, cloudTransform);
 
 		tree->SetLeafCloud(cloud);
-		UGameplayStatics::FinishSpawningActor(treeActor, treeTransform);
+	}
+
+	for (AActor* tree : spawnedTrees)
+	{
+		UGameplayStatics::FinishSpawningActor(tree, tree->GetTransform());
 	}
 }

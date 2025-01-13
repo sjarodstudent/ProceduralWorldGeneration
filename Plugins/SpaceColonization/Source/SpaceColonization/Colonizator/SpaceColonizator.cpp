@@ -59,8 +59,7 @@ void ASpaceColonizator::GrowRootBranch()
 	RootBranch = NewObject<USpaceColonizationNode>();
 	RootBranch->SetLocation(GetActorLocation());
 	RootBranch->SetRotation(GetActorRotation());
-	RootBranch->SetSegmentLength(SegmentLength);
-	RootBranch->SetMaxThickness(MaxThickness);
+	RootBranch->SetOptions(SegmentLength, MaxThickness, ThicknessGrowth);
 
 	// ensure the array is empty (it should but it is not)
 	if (!Branches.IsEmpty())
@@ -157,8 +156,7 @@ void ASpaceColonizator::GrowTrunk()
 	while (!IsBranchInAnyLeafAttractionDistance(LastBranch))
 	{
 		USpaceColonizationNode* newBranch = LastBranch->GrowChildNode(trunkDir);
-		newBranch->SetSegmentLength(SegmentLength);
-		newBranch->SetMaxThickness(MaxThickness);
+		newBranch->SetOptions(SegmentLength, MaxThickness, ThicknessGrowth);
 
 		Branches.Add(newBranch);
 		LastBranch = newBranch;
@@ -258,8 +256,7 @@ void ASpaceColonizator::GrowBranches()
 #endif
 
 			USpaceColonizationNode* child = branch->GrowChildNode();
-			child->SetSegmentLength(SegmentLength);
-			child->SetMaxThickness(MaxThickness);
+			child->SetOptions(SegmentLength, MaxThickness, ThicknessGrowth);
 			Branches.Add(child);
 			OnBranchSpawnedDo(child);
 		}
